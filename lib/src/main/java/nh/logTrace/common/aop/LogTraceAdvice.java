@@ -1,19 +1,31 @@
 package nh.logTrace.common.aop;
 
+import nh.logTrace.alert.LogAlert;
+import nh.logTrace.save.LogSave;
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.annotation.Aspect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
 @Aspect
 public class LogTraceAdvice {
 
-    private static final Logger logger = LoggerFactory.getLogger(LogTraceAdvice.class);
-
     // 쓰레드마다 요청 단위로 관리하는 ThreadLocal(쓰레드별 저장소)
     private static final ThreadLocal<ThreadStatus> threadHolder = new ThreadLocal<>();
+
+    private LogSave logSave;
+    private LogAlert logAlert;
+
+    @Autowired(required = false)
+    public void setLogAlert(LogAlert logAlert) {
+        this.logAlert = logAlert;
+    }
+
+    @Autowired(required = false)
+    public void setLogSave(LogSave logSave) {
+        this.logSave = logSave;
+    }
 
     public Object loggingCall(MethodInvocation invocation) throws Throwable {
 
@@ -32,23 +44,46 @@ public class LogTraceAdvice {
         status.incrementCallDepth();
         String prefix = "-".repeat(status.getCallDepth() * 4);
 
-        // 메서드 호출 시작 로그
-        logger.info("{}[TransactionId: {}] Entering {}.{}() with arguments: {}",
-                prefix, status.getTransactionId(), className, methodName, args);
+        // 정상 save
+        Log enteringLog = new Log.Builder()
+                .setPrefix(prefix)
+                .setTransactionId(status.getTransactionId())
+                .setClassName(className)
+                .setMethodName(methodName)
+                .setArgs(args)
+                .build();
+        this.logSave.save(status, enteringLog);
+
 
         Object result;
         try {
             result = invocation.proceed(); // 실제 메서드 호출
         } catch (Throwable throwable) {
-            // 예외 발생 시 로그 기록
-            logger.error("{}[TransactionId: {}] Exception in {}.{}() with cause: {}",
-                    prefix, status.getTransactionId(), className, methodName, throwable.getMessage(), throwable);
+            // 예외 save, alert
+            Log exceptionLog = new Log.Builder()
+                    .setPrefix(prefix)
+                    .setTransactionId(status.getTransactionId())
+                    .setClassName(className)
+                    .setMethodName(methodName)
+                    .setArgs(args)
+                    .setThrowableMessage(throwable.getMessage())
+                    .setThrowableStackTrace(throwable)
+                    .build();
+            this.logSave.save(status, exceptionLog);
+            this.logAlert.alert(status, exceptionLog);
+
             throw throwable;
         }
 
-        // 메서드 호출 종료 로그
-        logger.info("{}[TransactionId: {}] Exiting {}.{}() with result: {}",
-                prefix, status.getTransactionId(), className, methodName, result);
+        // 정상 save
+        Log exitingLog = new Log.Builder()
+                .setPrefix(prefix)
+                .setTransactionId(status.getTransactionId())
+                .setClassName(className)
+                .setMethodName(methodName)
+                .setResult(result)
+                .build();
+        this.logSave.save(status, exitingLog);
 
         status.decrementCallDepth();
         if (status.getCallDepth() == 0) {

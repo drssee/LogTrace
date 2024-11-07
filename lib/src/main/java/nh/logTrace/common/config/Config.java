@@ -1,10 +1,14 @@
 package nh.logTrace.common.config;
 
+import io.micrometer.common.util.StringUtils;
 import nh.logTrace.admin.AdminPageController;
 import nh.logTrace.alert.LogAlert;
+import nh.logTrace.alert.mail.GoogleSendMail;
+import nh.logTrace.alert.mail.MailLogAlert;
+import nh.logTrace.alert.mail.SendMail;
 import nh.logTrace.common.aop.LogTraceAdvice;
 import nh.logTrace.save.LogSave;
-import nh.logTrace.save.file.FileLoggerInitializer;
+import nh.logTrace.save.file.FileLogSave;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +32,15 @@ public class Config implements WebMvcConfigurer {
     public Config(ConfigProperties configProperties) {
         this.configProperties = configProperties;
     }
-    // TODO nh.logTrace 경로도 로그추적되게하기 + save 구
+
     /*
     로그 트레이스 빈 등록 시작
      */
     @Bean
     public Advisor logTrace(LogTraceAdvice logTraceAdvice) {
+        logger.info("init logTrace");
         JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
-        pointcut.setPatterns(configProperties.getBasePackage() + ".*", "nh.logTrace.*");
+        pointcut.setPattern(configProperties.getBasePackage() + ".*");
 
         // 메소드 호출을 가로챈뒤, loggingCall 실행
         MethodInterceptor interceptor = logTraceAdvice::loggingCall;
@@ -45,6 +50,7 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     public LogTraceAdvice logTraceAdvice() {
+        logger.info("init logTraceAdvice");
         return new LogTraceAdvice();
     }
     /*
@@ -62,6 +68,7 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     public AdminPageController adminPageController() {
+        logger.info("init adminPageController");
         return new AdminPageController();
     }
     /*
@@ -73,14 +80,15 @@ public class Config implements WebMvcConfigurer {
      */
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "FILE")
-    public LogSave FileLogRepository() {
-        FileLoggerInitializer.init();
-        return null;
+    public LogSave fileLogSave() {
+        logger.info("init FileLogSave");
+        return new FileLogSave();
     }
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
-    public LogSave DBLogRepository() {
+    public LogSave dbLogSave() {
+        logger.info("init DBLogSave");
         return null;
     }
     /*
@@ -92,13 +100,23 @@ public class Config implements WebMvcConfigurer {
      */
     @Bean
     @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
-    public LogAlert MailLogAlert() {
-        return null;
+    public LogAlert mailLogAlert() {
+        if (StringUtils.isEmpty(configProperties.getEmailId())) {
+            throw new RuntimeException("email is empty");
+        }
+        logger.info("init MailLogAlert");
+        return new MailLogAlert(configProperties.getEmailId(), configProperties.getEmailPwd(), googleSendMail());
+    }
+
+    @Bean
+    public SendMail googleSendMail() {
+        return new GoogleSendMail();
     }
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MESSAGE")
-    public LogAlert MessageLogAlert() {
+    public LogAlert messageLogAlert() {
+        logger.info("init MessageLogAlert");
         return null;
     }
     /*

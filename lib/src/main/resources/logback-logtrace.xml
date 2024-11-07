@@ -1,7 +1,6 @@
 <configuration>
     <!-- 날짜별로 로그 파일을 저장하는 RollingFileAppender 설정 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/logTrace.log</file>
 
         <!-- 날짜 기반 롤링 정책 설정 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">

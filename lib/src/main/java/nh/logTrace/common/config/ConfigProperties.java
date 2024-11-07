@@ -18,12 +18,15 @@ public class ConfigProperties {
     private String alert;
     private String adminUrl;
     private String basePackage;
+    private String emailId;
+    private String emailPwd;
 
     public ConfigProperties() {
         this.save = SAVE_METHODS[DEFAULT];
         this.alert = ALERT_METHODS[DEFAULT];
         this.adminUrl = DEFAULT_ADMIN_URL;
         this.basePackage = "";
+        this.emailId = "";
     }
 
     public String getAlert() {
@@ -62,5 +65,21 @@ public class ConfigProperties {
 
     public void setBasePackage(String basePackage) {
         this.basePackage = basePackage;
+    }
+
+    public String getEmailId() {
+        return emailId;
+    }
+
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+
+    public String getEmailPwd() {
+        return emailPwd;
+    }
+
+    public void setEmailPwd(String emailPwd) {
+        this.emailPwd = emailPwd;
     }
 }

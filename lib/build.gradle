@@ -30,6 +30,7 @@ dependencies {
     compileOnly 'org.springframework.boot:spring-boot-starter:3.3.5'
     compileOnly 'org.springframework.boot:spring-boot-starter-web:3.3.5'
     compileOnly 'org.springframework.boot:spring-boot-starter-aop:3.3.5'
+    compileOnly 'com.sun.mail:javax.mail:1.6.2'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.5'
 }
 
