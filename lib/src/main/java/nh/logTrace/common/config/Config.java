@@ -19,10 +19,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@EnableAsync
 @ComponentScan(basePackages = "nh.logTrace.common")
 public class Config implements WebMvcConfigurer {
 
@@ -89,6 +91,7 @@ public class Config implements WebMvcConfigurer {
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
     public LogSave dbLogSave() {
         logger.info("init DBLogSave");
+        // TODO DB 저장 구현, springsession 테이블 생성해 저장시켜주는거 따라하면 될듯?
         return null;
     }
     /*

@@ -70,7 +70,11 @@ public class LogTraceAdvice {
                     .setThrowableStackTrace(throwable)
                     .build();
             this.logSave.save(status, exceptionLog);
-            this.logAlert.alert(status, exceptionLog);
+
+            if (!status.isAlertException()) {
+                this.logAlert.alert(status, exceptionLog);
+                status.setAlertException(true);
+            }
 
             throw throwable;
         }

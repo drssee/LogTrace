@@ -18,6 +18,11 @@ public class MailLogAlert implements LogAlert {
 
     @Override
     public void alert(ThreadStatus threadStatus, Log log) {
-        sendMail.send(emailId, emailPwd, "test제목", "테스트");
+        sendMail.send(
+                emailId,
+                emailPwd,
+                threadStatus.getTransactionId() + " - " + log.getThrowableMessage() + "(" + log.getCreatedAt() + ")",
+                log.getThrowableStackTrace().toString()
+        );
     }
 }

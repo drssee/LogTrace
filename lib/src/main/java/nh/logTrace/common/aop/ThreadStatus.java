@@ -4,6 +4,7 @@ public class ThreadStatus {
 
     private String transactionId;
     private int callDepth;
+    private boolean isAlertException;
 
     public ThreadStatus(String transactionId) {
         this.transactionId = transactionId;
@@ -23,5 +24,13 @@ public class ThreadStatus {
 
     public void decrementCallDepth() {
         this.callDepth--;
+    }
+
+    public boolean isAlertException() {
+        return isAlertException;
+    }
+
+    public void setAlertException(boolean alertException) {
+        isAlertException = alertException;
     }
 }
