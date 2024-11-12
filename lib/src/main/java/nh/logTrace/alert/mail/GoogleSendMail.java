@@ -1,5 +1,6 @@
 package nh.logTrace.alert.mail;
 
+import io.micrometer.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -24,6 +25,10 @@ public class GoogleSendMail implements SendMail {
     @Override
     @Async
     public void send(String emailId, String emailPwd, String subject, String body) {
+
+        if (StringUtils.isEmpty(emailId)) {
+            throw new RuntimeException("emailId is empty");
+        }
 
         // 구글 메일 프로퍼티 설정
         Properties props = new Properties();

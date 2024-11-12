@@ -8,14 +8,24 @@ import nh.logTrace.alert.mail.MailLogAlert;
 import nh.logTrace.alert.mail.SendMail;
 import nh.logTrace.common.aop.LogTraceAdvice;
 import nh.logTrace.save.LogSave;
+import nh.logTrace.save.db.DbLogSave;
+import nh.logTrace.save.db.repository.JdbcLogRepository;
+import nh.logTrace.save.db.repository.JpaLogRepository;
+import nh.logTrace.save.db.repository.LogRepository;
+import nh.logTrace.save.db.repository.MybatisLogRepository;
 import nh.logTrace.save.file.FileLogSave;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -89,11 +99,35 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
-    public LogSave dbLogSave() {
+    public LogSave dbLogSave(LogRepository logRepository) {
         logger.info("init DBLogSave");
-        // TODO DB 저장 구현, springsession 테이블 생성해 저장시켜주는거 따라하면 될듯?
-        return null;
+        return new DbLogSave(logRepository);
     }
+
+    @Bean
+    @ConditionalOnBean(SqlSessionFactory.class)
+    public LogRepository mybatisLogRepository() {
+        logger.info("init MybatisLogRepository");
+        return new MybatisLogRepository();
+    }
+
+    @Bean
+    @ConditionalOnBean(EntityManagerFactoryBuilder.class)
+    public LogRepository jpaLogRepository() {
+        logger.info("init JpaLogRepository");
+        return new JpaLogRepository();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean({SqlSessionTemplate.class, EntityManagerFactoryBuilder.class})
+    public LogRepository JdbcLogRepository() {
+        logger.info("init JdbcLogRepository");
+        return new JdbcLogRepository();
+    }
+
+    // TODO DB어댑터 등록
+    // 1. 어플리케이션 라이브러리에 사용중인 DB드라이버 빈 조회 -> 없으면 예외
+    // 2. 사용중인 DB와 매칭되는 ddl,sql 가져와 사용
     /*
     save 빈 등록 종료
      */
@@ -104,15 +138,14 @@ public class Config implements WebMvcConfigurer {
     @Bean
     @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
     public LogAlert mailLogAlert() {
-        if (StringUtils.isEmpty(configProperties.getEmailId())) {
-            throw new RuntimeException("email is empty");
-        }
         logger.info("init MailLogAlert");
         return new MailLogAlert(configProperties.getEmailId(), configProperties.getEmailPwd(), googleSendMail());
     }
 
     @Bean
+    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
     public SendMail googleSendMail() {
+        logger.info("init GoogleSendMail");
         return new GoogleSendMail();
     }
 
@@ -122,6 +155,9 @@ public class Config implements WebMvcConfigurer {
         logger.info("init MessageLogAlert");
         return null;
     }
+
+    // TODO DEFAULT save, alert 빈 추가 필요
+
     /*
     alert 빈 등록 종료
      */

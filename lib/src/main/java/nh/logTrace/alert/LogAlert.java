@@ -1,9 +1,9 @@
 package nh.logTrace.alert;
 
-import nh.logTrace.common.aop.Log;
-import nh.logTrace.common.aop.ThreadStatus;
+import nh.logTrace.common.domain.LogDto;
+import nh.logTrace.common.domain.ThreadStatus;
 
 public interface LogAlert {
 
-    void alert(ThreadStatus threadStatus, Log log);
+    void alert(ThreadStatus threadStatus, LogDto logDto);
 }

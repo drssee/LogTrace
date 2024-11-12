@@ -1,4 +1,4 @@
-package nh.logTrace.common.aop;
+package nh.logTrace.common.domain;
 
 public class ThreadStatus {
 

@@ -1,6 +1,8 @@
 package nh.logTrace.common.aop;
 
 import nh.logTrace.alert.LogAlert;
+import nh.logTrace.common.domain.LogDto;
+import nh.logTrace.common.domain.ThreadStatus;
 import nh.logTrace.save.LogSave;
 import org.aopalliance.intercept.MethodInvocation;
 import org.aspectj.lang.annotation.Aspect;
@@ -45,14 +47,14 @@ public class LogTraceAdvice {
         String prefix = "-".repeat(status.getCallDepth() * 4);
 
         // 정상 save
-        Log enteringLog = new Log.Builder()
+        LogDto enteringLogDto = new LogDto.Builder()
                 .setPrefix(prefix)
                 .setTransactionId(status.getTransactionId())
                 .setClassName(className)
                 .setMethodName(methodName)
                 .setArgs(args)
                 .build();
-        this.logSave.save(status, enteringLog);
+        this.logSave.save(status, enteringLogDto);
 
 
         Object result;
@@ -60,7 +62,7 @@ public class LogTraceAdvice {
             result = invocation.proceed(); // 실제 메서드 호출
         } catch (Throwable throwable) {
             // 예외 save, alert
-            Log exceptionLog = new Log.Builder()
+            LogDto exceptionLogDto = new LogDto.Builder()
                     .setPrefix(prefix)
                     .setTransactionId(status.getTransactionId())
                     .setClassName(className)
@@ -69,10 +71,10 @@ public class LogTraceAdvice {
                     .setThrowableMessage(throwable.getMessage())
                     .setThrowableStackTrace(throwable)
                     .build();
-            this.logSave.save(status, exceptionLog);
+            this.logSave.save(status, exceptionLogDto);
 
             if (!status.isAlertException()) {
-                this.logAlert.alert(status, exceptionLog);
+                this.logAlert.alert(status, exceptionLogDto);
                 status.setAlertException(true);
             }
 
@@ -80,14 +82,14 @@ public class LogTraceAdvice {
         }
 
         // 정상 save
-        Log exitingLog = new Log.Builder()
+        LogDto exitingLogDto = new LogDto.Builder()
                 .setPrefix(prefix)
                 .setTransactionId(status.getTransactionId())
                 .setClassName(className)
                 .setMethodName(methodName)
                 .setResult(result)
                 .build();
-        this.logSave.save(status, exitingLog);
+        this.logSave.save(status, exitingLogDto);
 
         status.decrementCallDepth();
         if (status.getCallDepth() == 0) {

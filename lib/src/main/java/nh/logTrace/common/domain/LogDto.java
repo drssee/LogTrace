@@ -1,9 +1,9 @@
-package nh.logTrace.common.aop;
+package nh.logTrace.common.domain;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-public class Log {
+public class LogDto {
 
     private Long id;
     private String transactionId;
@@ -16,7 +16,7 @@ public class Log {
     private Throwable throwableStackTrace;
     private LocalDateTime createdAt;
 
-    private Log(Builder builder) {
+    private LogDto(Builder builder) {
         this.args = builder.args;
         this.className = builder.className;
         this.id = builder.id;
@@ -125,8 +125,8 @@ public class Log {
             return this;
         }
 
-        public Log build() {
-            return new Log(this);
+        public LogDto build() {
+            return new LogDto(this);
         }
     }
 }

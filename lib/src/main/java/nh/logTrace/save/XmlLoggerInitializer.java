@@ -1,4 +1,4 @@
-package nh.logTrace.save.file;
+package nh.logTrace.save;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -7,15 +7,22 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 
-public class FileLoggerInitializer {
+public class XmlLoggerInitializer {
 
-    public static void init() {
+    /**
+     * 사용 어플리케이션과 별개로, 라이브러리 자체 로그 설정
+     */
+    public static void init(String xmlFileName) {
+        // 로거 관리 context
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        // 로거 설정을 위한 configurator
         JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(context);
 
-        try (InputStream configStream = FileLoggerInitializer.class
-                .getClassLoader().getResourceAsStream("logback-logtrace.xml")) {
+        // 해당 xml 파일에서 설정을 가져와 적용
+        try (InputStream configStream = XmlLoggerInitializer.class
+                .getClassLoader().getResourceAsStream(xmlFileName)) {
 
             if (configStream != null) {
                 configurator.doConfigure(configStream);

@@ -1,0 +1,16 @@
+<configuration>
+    <configuration>
+        <!-- 콘솔 출력용 ConsoleAppender 설정 -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- 라이브러리 패키지 전용 로거 설정 -->
+        <logger name="nh.logTrace" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE" /> <!-- 콘솔 출력만 사용 -->
+        </logger>
+    </configuration>
+
+</configuration>
