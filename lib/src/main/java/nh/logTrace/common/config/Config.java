@@ -1,6 +1,5 @@
 package nh.logTrace.common.config;
 
-import io.micrometer.common.util.StringUtils;
 import nh.logTrace.admin.AdminPageController;
 import nh.logTrace.alert.LogAlert;
 import nh.logTrace.alert.mail.GoogleSendMail;
@@ -8,6 +7,7 @@ import nh.logTrace.alert.mail.MailLogAlert;
 import nh.logTrace.alert.mail.SendMail;
 import nh.logTrace.common.aop.LogTraceAdvice;
 import nh.logTrace.save.LogSave;
+import nh.logTrace.save.db.DbAdapter;
 import nh.logTrace.save.db.DbLogSave;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
 import nh.logTrace.save.db.repository.JpaLogRepository;
@@ -32,6 +32,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableAsync
@@ -104,30 +106,37 @@ public class Config implements WebMvcConfigurer {
         return new DbLogSave(logRepository);
     }
 
+    // TODO 사용 dataSource 빈이 여러개일 경우 문제가 생김, 해결방법 생각해보기
     @Bean
+    @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
+    public DbAdapter dbAdapter(DataSource dataSource) {
+        logger.info("init DBAdapter");
+        return new DbAdapter(dataSource);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
     @ConditionalOnBean(SqlSessionFactory.class)
-    public LogRepository mybatisLogRepository() {
+    public LogRepository mybatisLogRepository(DataSource dataSource) {
         logger.info("init MybatisLogRepository");
-        return new MybatisLogRepository();
+        return new MybatisLogRepository(dbAdapter(dataSource));
     }
 
     @Bean
+    @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
     @ConditionalOnBean(EntityManagerFactoryBuilder.class)
-    public LogRepository jpaLogRepository() {
+    public LogRepository jpaLogRepository(DataSource dataSource) {
         logger.info("init JpaLogRepository");
-        return new JpaLogRepository();
+        return new JpaLogRepository(dbAdapter(dataSource));
     }
 
     @Bean
+    @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
     @ConditionalOnMissingBean({SqlSessionTemplate.class, EntityManagerFactoryBuilder.class})
-    public LogRepository JdbcLogRepository() {
+    public LogRepository JdbcLogRepository(DataSource dataSource) {
         logger.info("init JdbcLogRepository");
-        return new JdbcLogRepository();
+        return new JdbcLogRepository(dbAdapter(dataSource));
     }
-
-    // TODO DB어댑터 등록
-    // 1. 어플리케이션 라이브러리에 사용중인 DB드라이버 빈 조회 -> 없으면 예외
-    // 2. 사용중인 DB와 매칭되는 ddl,sql 가져와 사용
     /*
     save 빈 등록 종료
      */

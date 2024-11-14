@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface LogRepository {
 
+    void initTable();
+
     Long save(LogEntity logEntity);
     LogEntity findById(Long id);
     List<LogEntity> findAll();

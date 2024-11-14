@@ -8,6 +8,9 @@ import nh.logTrace.save.db.repository.LogRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * (logRepository - jdbc/jpa/mybatis logRepository) -> (dbAdapter) -> (sql - oracle/maira/h2 sql)
+ */
 public class DbLogSave implements LogSave {
 
     private static final Logger logger = LoggerFactory.getLogger(DbLogSave.class);
@@ -17,6 +20,9 @@ public class DbLogSave implements LogSave {
     public DbLogSave(LogRepository logRepository) {
         XmlLoggerInitializer.init(DEFAULT_CONFIG_FILE);
         this.logRepository = logRepository;
+
+        // TODO repository->adapter->sql 가져와서, 로그저장 테이블 없으면 생성하기
+        this.logRepository.initTable();
     }
 
     @Override

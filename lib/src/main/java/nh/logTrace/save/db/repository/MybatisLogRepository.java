@@ -1,10 +1,22 @@
 package nh.logTrace.save.db.repository;
 
 import nh.logTrace.common.domain.LogEntity;
+import nh.logTrace.save.db.DbAdapter;
 
 import java.util.List;
 
 public class MybatisLogRepository implements LogRepository {
+
+    private final DbAdapter dbAdapter;
+
+    public MybatisLogRepository(DbAdapter dbAdapter) {
+        this.dbAdapter = dbAdapter;
+    }
+
+    @Override
+    public void initTable() {
+
+    }
 
     @Override
     public List<LogEntity> findAll() {
