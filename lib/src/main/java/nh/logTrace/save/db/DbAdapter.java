@@ -1,10 +1,10 @@
 package nh.logTrace.save.db;
 
 
-import nh.logTrace.save.db.sql.H2Sql;
-import nh.logTrace.save.db.sql.MariaSql;
-import nh.logTrace.save.db.sql.OracleSql;
-import nh.logTrace.save.db.sql.Sql;
+import nh.logTrace.save.db.sql.jdbc.H2Sql;
+import nh.logTrace.save.db.sql.jdbc.MariaSql;
+import nh.logTrace.save.db.sql.jdbc.OracleSql;
+import nh.logTrace.save.db.sql.jdbc.Sql;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -24,7 +24,7 @@ public class DbAdapter {
 
     public DbAdapter(DataSource dataSource) {
         this.dataSource = dataSource;
-        initSql(dataSource);
+        initSql(this.dataSource);
     }
 
     private void initSql(DataSource dataSource) {
@@ -38,13 +38,13 @@ public class DbAdapter {
 
                 switch (driverName) {
                     case "H2 JDBC Driver":
-                        this.sql = new H2Sql(dataSource);
+                        this.sql = new H2Sql();
                         break;
                     case "MariaDB Connector/J":
-                        this.sql = new MariaSql(dataSource);
+                        this.sql = new MariaSql();
                         break;
                     case "Oracle JDBC Driver":
-                        this.sql = new OracleSql(dataSource);
+                        this.sql = new OracleSql();
                         break;
                 }
 

@@ -54,7 +54,7 @@ public class LogTraceAdvice {
                 .setMethodName(methodName)
                 .setArgs(args)
                 .build();
-        this.logSave.save(status, enteringLogDto);
+        this.logSave.save(enteringLogDto);
 
 
         Object result;
@@ -71,7 +71,7 @@ public class LogTraceAdvice {
                     .setThrowableMessage(throwable.getMessage())
                     .setThrowableStackTrace(throwable)
                     .build();
-            this.logSave.save(status, exceptionLogDto);
+            this.logSave.save(exceptionLogDto);
 
             if (!status.isAlertException()) {
                 this.logAlert.alert(status, exceptionLogDto);
@@ -89,7 +89,7 @@ public class LogTraceAdvice {
                 .setMethodName(methodName)
                 .setResult(result)
                 .build();
-        this.logSave.save(status, exitingLogDto);
+        this.logSave.save(exitingLogDto);
 
         status.decrementCallDepth();
         if (status.getCallDepth() == 0) {

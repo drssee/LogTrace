@@ -1,12 +1,14 @@
 package nh.logTrace.save.db;
 
 import nh.logTrace.common.domain.LogDto;
-import nh.logTrace.common.domain.ThreadStatus;
+import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.LogSave;
 import nh.logTrace.save.XmlLoggerInitializer;
 import nh.logTrace.save.db.repository.LogRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
 
 /**
  * (logRepository - jdbc/jpa/mybatis logRepository) -> (dbAdapter) -> (sql - oracle/maira/h2 sql)
@@ -20,14 +22,24 @@ public class DbLogSave implements LogSave {
     public DbLogSave(LogRepository logRepository) {
         XmlLoggerInitializer.init(DEFAULT_CONFIG_FILE);
         this.logRepository = logRepository;
-
-        // TODO repository->adapter->sql 가져와서, 로그저장 테이블 없으면 생성하기
         this.logRepository.initTable();
     }
 
     @Override
-    public void save(ThreadStatus threadStatus, LogDto logDto) {
-        // TODO 콘솔에 로그를 찍고, db에 저장
-        logger.info("id {} save", threadStatus.getTransactionId());
+    public void save(LogDto logDto) {
+        logger.info("id {},  log db save", logDto.getTransactionId());
+
+        LogEntity logEntity = new LogEntity();
+        logEntity.setId(logDto.getId());
+        logEntity.setTransactionId(logDto.getTransactionId());
+        logEntity.setClassName(logDto.getClassName());
+        logEntity.setMethodName(logDto.getMethodName());
+        logEntity.setArgs(logDto.getArgs());
+        logEntity.setResult(logDto.getResult());
+        logEntity.setThrowableMessage(logDto.getThrowableMessage());
+        logEntity.setThrowableStackTrace(logDto.getThrowableStackTrace());
+        logEntity.setCreatedAt(logDto.getCreatedAt());
+
+        this.logRepository.save(logEntity);
     }
 }

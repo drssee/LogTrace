@@ -135,7 +135,7 @@ public class Config implements WebMvcConfigurer {
     @ConditionalOnMissingBean({SqlSessionTemplate.class, EntityManagerFactoryBuilder.class})
     public LogRepository JdbcLogRepository(DataSource dataSource) {
         logger.info("init JdbcLogRepository");
-        return new JdbcLogRepository(dbAdapter(dataSource));
+        return new JdbcLogRepository(dataSource, dbAdapter(dataSource));
     }
     /*
     save 빈 등록 종료

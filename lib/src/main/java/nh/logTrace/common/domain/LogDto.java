@@ -29,8 +29,8 @@ public class LogDto {
         this.createdAt = LocalDateTime.now();
     }
 
-    public String getArgs() {
-        return Arrays.toString(args);
+    public Object[] getArgs() {
+        return args;
     }
 
     public String getClassName() {
