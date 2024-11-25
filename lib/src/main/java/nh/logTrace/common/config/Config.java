@@ -2,6 +2,7 @@ package nh.logTrace.common.config;
 
 import nh.logTrace.admin.AdminPageController;
 import nh.logTrace.alert.LogAlert;
+import nh.logTrace.alert.MESSAGE.MessageLogAlert;
 import nh.logTrace.alert.mail.GoogleSendMail;
 import nh.logTrace.alert.mail.MailLogAlert;
 import nh.logTrace.alert.mail.SendMail;
@@ -86,7 +87,7 @@ public class Config implements WebMvcConfigurer {
     save 빈 등록 시작
      */
     @Bean
-    @ConditionalOnProperty(name = "logtrace.save", havingValue = "FILE")
+    @ConditionalOnProperty(name = "logtrace.save", havingValue = "FILE", matchIfMissing = true)
     public LogSave fileLogSave() {
         logger.info("init FileLogSave");
         return new FileLogSave();
@@ -135,13 +136,11 @@ public class Config implements WebMvcConfigurer {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MESSAGE")
+    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MESSAGE", matchIfMissing = true)
     public LogAlert messageLogAlert() {
         logger.info("init MessageLogAlert");
-        return null;
+        return new MessageLogAlert();
     }
-
-    // TODO DEFAULT save, alert 빈 추가 필요
 
     /*
     alert 빈 등록 종료

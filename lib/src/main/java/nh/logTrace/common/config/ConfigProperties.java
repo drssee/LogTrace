@@ -1,5 +1,6 @@
 package nh.logTrace.common.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -10,9 +11,9 @@ import java.util.Arrays;
 public class ConfigProperties {
 
     private final String[] SAVE_METHODS = {"FILE", "DB"};
-    private final String[] ALERT_METHODS = {"MAIL", "MESSAGE"};
+    private final String[] ALERT_METHODS = {"MESSAGE", "MAIL"};
     private String DEFAULT_ADMIN_URL = "/log/**";
-    private final int DEFAULT = 0;
+    private String DEFAULT_BASE_PACKAGE = "nh.logTrace";
 
     private String save;
     private String alert;
@@ -22,11 +23,8 @@ public class ConfigProperties {
     private String emailPwd;
 
     public ConfigProperties() {
-        this.save = SAVE_METHODS[DEFAULT];
-        this.alert = ALERT_METHODS[DEFAULT];
         this.adminUrl = DEFAULT_ADMIN_URL;
-        this.basePackage = "";
-        this.emailId = "";
+        this.basePackage = DEFAULT_BASE_PACKAGE;
     }
 
     public String getAlert() {
