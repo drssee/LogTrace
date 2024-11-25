@@ -11,7 +11,6 @@ public class LogEntity {
     private Object[] args;
     private Object result;
     private String throwableMessage;
-    private Throwable throwableStackTrace;
     private LocalDateTime createdAt;
 
     public Object[] getArgs() {
@@ -68,14 +67,6 @@ public class LogEntity {
 
     public void setThrowableMessage(String throwableMessage) {
         this.throwableMessage = throwableMessage;
-    }
-
-    public Throwable getThrowableStackTrace() {
-        return throwableStackTrace;
-    }
-
-    public void setThrowableStackTrace(Throwable throwableStackTrace) {
-        this.throwableStackTrace = throwableStackTrace;
     }
 
     public String getTransactionId() {

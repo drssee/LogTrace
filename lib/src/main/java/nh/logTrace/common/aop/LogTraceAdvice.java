@@ -19,12 +19,12 @@ public class LogTraceAdvice {
     private LogSave logSave;
     private LogAlert logAlert;
 
-    @Autowired(required = false)
+    @Autowired
     public void setLogAlert(LogAlert logAlert) {
         this.logAlert = logAlert;
     }
 
-    @Autowired(required = false)
+    @Autowired
     public void setLogSave(LogSave logSave) {
         this.logSave = logSave;
     }

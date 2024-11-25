@@ -1,4 +1,4 @@
-package nh.logTrace.save.db.sql.jdbc;
+package nh.logTrace.save.db.sql;
 
 public class H2Sql extends Sql{
 
@@ -7,17 +7,16 @@ public class H2Sql extends Sql{
             "    transaction_id VARCHAR(255),\n" +
             "    class_name VARCHAR(255),\n" +
             "    method_name VARCHAR(255),\n" +
-            "    args CLOB,\n" +
-            "    result CLOB,\n" +
+            "    args VARCHAR(255),\n" +
+            "    result VARCHAR(255),\n" +
             "    throwable_message VARCHAR(255),\n" +
-            "    throwable_stack_trace VARCHAR(255),\n" +
             "    created_at TIMESTAMP\n" +
             ");";
 
     private String H2_INSERT = "INSERT INTO logtrace (\n" +
-            "    transaction_id, class_name, method_name, args, result, throwable_message, throwable_stack_trace, created_at\n" +
+            "    transaction_id, class_name, method_name, args, result, throwable_message, created_at\n" +
             ") VALUES (\n" +
-            "    ?, ?, ?, ?, ?, ?, ?, ?\n" +
+            "    ?, ?, ?, ?, ?, ?, ?\n" +
             ");";
 
     private String H2_SELECT = "SELECT * FROM logtrace WHERE id = ?;";

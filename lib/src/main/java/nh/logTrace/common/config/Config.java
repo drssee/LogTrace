@@ -10,22 +10,15 @@ import nh.logTrace.save.LogSave;
 import nh.logTrace.save.db.DbAdapter;
 import nh.logTrace.save.db.DbLogSave;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
-import nh.logTrace.save.db.repository.JpaLogRepository;
 import nh.logTrace.save.db.repository.LogRepository;
-import nh.logTrace.save.db.repository.MybatisLogRepository;
 import nh.logTrace.save.file.FileLogSave;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -116,23 +109,6 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
-    @ConditionalOnBean(SqlSessionFactory.class)
-    public LogRepository mybatisLogRepository(DataSource dataSource) {
-        logger.info("init MybatisLogRepository");
-        return new MybatisLogRepository(dbAdapter(dataSource));
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
-    @ConditionalOnBean(EntityManagerFactoryBuilder.class)
-    public LogRepository jpaLogRepository(DataSource dataSource) {
-        logger.info("init JpaLogRepository");
-        return new JpaLogRepository(dbAdapter(dataSource));
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
-    @ConditionalOnMissingBean({SqlSessionTemplate.class, EntityManagerFactoryBuilder.class})
     public LogRepository JdbcLogRepository(DataSource dataSource) {
         logger.info("init JdbcLogRepository");
         return new JdbcLogRepository(dataSource, dbAdapter(dataSource));

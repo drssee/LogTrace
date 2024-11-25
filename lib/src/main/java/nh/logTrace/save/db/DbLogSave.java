@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * (logRepository - jdbc/jpa/mybatis logRepository) -> (dbAdapter) -> (sql - oracle/maira/h2 sql)
@@ -26,7 +27,7 @@ public class DbLogSave implements LogSave {
     }
 
     @Override
-    public void save(LogDto logDto) {
+    public Long save(LogDto logDto) {
         logger.info("id {},  log db save", logDto.getTransactionId());
 
         LogEntity logEntity = new LogEntity();
@@ -37,9 +38,8 @@ public class DbLogSave implements LogSave {
         logEntity.setArgs(logDto.getArgs());
         logEntity.setResult(logDto.getResult());
         logEntity.setThrowableMessage(logDto.getThrowableMessage());
-        logEntity.setThrowableStackTrace(logDto.getThrowableStackTrace());
         logEntity.setCreatedAt(logDto.getCreatedAt());
 
-        this.logRepository.save(logEntity);
+        return this.logRepository.save(logEntity);
     }
 }

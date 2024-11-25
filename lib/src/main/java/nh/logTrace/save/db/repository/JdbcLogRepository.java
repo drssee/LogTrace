@@ -1,15 +1,17 @@
 package nh.logTrace.save.db.repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.DbAdapter;
-import nh.logTrace.save.db.sql.jdbc.Sql;
+import nh.logTrace.save.db.sql.Sql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JdbcLogRepository implements LogRepository {
@@ -17,10 +19,12 @@ public class JdbcLogRepository implements LogRepository {
     private final Logger logger = LoggerFactory.getLogger(JdbcLogRepository.class);
     private final DataSource dataSource;
     private final Sql sql;
+    private final ObjectMapper objectMapper;
 
     public JdbcLogRepository(DataSource dataSource, DbAdapter dbAdapter) {
         this.dataSource = dataSource;
         this.sql = dbAdapter.getSql();
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -35,9 +39,7 @@ public class JdbcLogRepository implements LogRepository {
 
     @Override
     public Long save(LogEntity logEntity) {
-        // not supported type
-        executeQuery(sql.getInsertSql(), logEntity);
-        return logEntity.getId();
+        return executeQuery(sql.getInsertSql(), logEntity);
     }
 
     @Override
@@ -45,22 +47,30 @@ public class JdbcLogRepository implements LogRepository {
         return executeQueryForObject(sql.getSelectSql(), id);
     }
 
-    private void executeQuery(String sql, LogEntity entity) {
+    private Long executeQuery(String sql, LogEntity entity) {
         try (Connection conn = dataSource.getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             if (entity != null) {
                 pstmt.setString(1, entity.getTransactionId());
                 pstmt.setString(2, entity.getClassName());
                 pstmt.setString(3, entity.getMethodName());
-                pstmt.setObject(4, entity.getArgs());
-                pstmt.setObject(5, entity.getResult());
+                pstmt.setString(4, Arrays.toString(entity.getArgs()));
+                pstmt.setString(5, entity.getResult() == null ? "" : entity.getResult().toString());
                 pstmt.setString(6, entity.getThrowableMessage());
-                pstmt.setObject(7, entity.getThrowableStackTrace());
-                pstmt.setObject(8, entity.getCreatedAt());
+                pstmt.setObject(7, entity.getCreatedAt());
+                pstmt.executeUpdate();
+
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getLong(1);
+                    }
+                }
+
             }
 
             pstmt.executeUpdate();
+            return 0L;
 
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -83,11 +93,10 @@ public class JdbcLogRepository implements LogRepository {
                 logEntity.setTransactionId(rs.getString(2));
                 logEntity.setClassName(rs.getString(3));
                 logEntity.setMethodName(rs.getString(4));
-                logEntity.setArgs((Object[]) rs.getObject(5));
+                logEntity.setArgs(parse(rs.getString(5), Object[].class));
                 logEntity.setResult(rs.getObject(6));
                 logEntity.setThrowableMessage(rs.getString(7));
-                logEntity.setThrowableStackTrace((Throwable) rs.getObject(8));
-                logEntity.setCreatedAt((LocalDateTime) rs.getObject(9));
+                logEntity.setCreatedAt(rs.getTimestamp(8).toLocalDateTime());
                 return logEntity;
             }
 
@@ -111,11 +120,10 @@ public class JdbcLogRepository implements LogRepository {
                 logEntity.setTransactionId(rs.getString(2));
                 logEntity.setClassName(rs.getString(3));
                 logEntity.setMethodName(rs.getString(4));
-                logEntity.setArgs((Object[]) rs.getObject(5));
+                logEntity.setArgs(parse(rs.getString(5), Object[].class));
                 logEntity.setResult(rs.getObject(6));
                 logEntity.setThrowableMessage(rs.getString(7));
-                logEntity.setThrowableStackTrace((Throwable) rs.getObject(8));
-                logEntity.setCreatedAt((LocalDateTime) rs.getObject(9));
+                logEntity.setCreatedAt(rs.getTimestamp(8).toLocalDateTime());
                 logEntities.add(logEntity);
             }
 
@@ -127,4 +135,13 @@ public class JdbcLogRepository implements LogRepository {
         }
     }
 
+    private <T> T parse(String json, Class<T> clazz) {
+        T result;
+        try {
+            result = objectMapper.readValue(json, clazz);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+        return result;
+    }
 }

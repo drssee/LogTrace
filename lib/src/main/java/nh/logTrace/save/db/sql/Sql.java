@@ -1,4 +1,4 @@
-package nh.logTrace.save.db.sql.jdbc;
+package nh.logTrace.save.db.sql;
 
 public abstract class Sql {
 
