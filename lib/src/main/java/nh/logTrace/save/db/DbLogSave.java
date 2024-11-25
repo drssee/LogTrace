@@ -27,7 +27,7 @@ public class DbLogSave implements LogSave {
     }
 
     @Override
-    public Long save(LogDto logDto) {
+    public void save(LogDto logDto) {
         logger.info("id {},  log db save", logDto.getTransactionId());
 
         LogEntity logEntity = new LogEntity();
@@ -40,6 +40,6 @@ public class DbLogSave implements LogSave {
         logEntity.setThrowableMessage(logDto.getThrowableMessage());
         logEntity.setCreatedAt(logDto.getCreatedAt());
 
-        return this.logRepository.save(logEntity);
+        this.logRepository.save(logEntity);
     }
 }
