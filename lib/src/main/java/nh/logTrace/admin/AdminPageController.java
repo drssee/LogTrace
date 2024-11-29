@@ -10,6 +10,6 @@ public class AdminPageController {
 
     @GetMapping("/index")
     public String test() {
-        return "forward:/logTrace.html";
+        return "forward:/index.html";
     }
 }
