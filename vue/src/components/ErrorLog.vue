@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h1>메뉴 2 내용</h1>
-        <p>여기에 메뉴 2 관련 내용을 작성합니다.</p>
+        <h1>ErrorLog</h1>
+        <p>날짜로 에러로그를 조회해 보여줘야함(default: 오늘)</p>
     </div>
 </template>
 <script>

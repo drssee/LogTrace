@@ -1,6 +1,8 @@
 package nh.logTrace.common.config;
 
 import nh.logTrace.admin.AdminPageController;
+import nh.logTrace.admin.AdminPageRepository;
+import nh.logTrace.admin.AdminPageService;
 import nh.logTrace.alert.LogAlert;
 import nh.logTrace.alert.MESSAGE.MessageLogAlert;
 import nh.logTrace.alert.mail.GoogleSendMail;
@@ -77,7 +79,19 @@ public class Config implements WebMvcConfigurer {
     @Bean
     public AdminPageController adminPageController() {
         logger.info("init adminPageController");
-        return new AdminPageController();
+        return new AdminPageController(adminPageService());
+    }
+
+    @Bean
+    public AdminPageService adminPageService() {
+        logger.info("init adminPageService");
+        return new AdminPageService(adminPageRepository());
+    }
+
+    @Bean
+    public AdminPageRepository adminPageRepository() {
+        logger.info("init adminPageRepository");
+        return new AdminPageRepository();
     }
     /*
     admin 페이지 등록 종료

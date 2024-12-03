@@ -14,7 +14,6 @@ public class ConfigProperties {
     private final String[] ALERT_METHODS = {"MESSAGE", "MAIL"};
     private String DEFAULT_ADMIN_URL = "/log/**";
     private String DEFAULT_BASE_PACKAGE = "nh.logTrace";
-    private String DEFAULT_PORT = "8080";
 
     private String save;
     private String alert;
@@ -22,12 +21,10 @@ public class ConfigProperties {
     private String basePackage;
     private String emailId;
     private String emailPwd;
-    private String port;
 
     public ConfigProperties() {
         this.adminUrl = DEFAULT_ADMIN_URL;
         this.basePackage = DEFAULT_BASE_PACKAGE;
-        this.port = DEFAULT_PORT;
     }
 
     public String getAlert() {
@@ -82,13 +79,5 @@ public class ConfigProperties {
 
     public void setEmailPwd(String emailPwd) {
         this.emailPwd = emailPwd;
-    }
-
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
     }
 }

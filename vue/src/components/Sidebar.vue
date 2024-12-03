@@ -1,9 +1,9 @@
 <template>
     <div class="sidebar">
         <ul>
-            <li><router-link to="/logView">메뉴 1</router-link></li>
-            <li><router-link to="/errorLog">메뉴 2</router-link></li>
-            <li><router-link to="/config">메뉴 3</router-link></li>
+            <li><router-link to="/logView">LogView</router-link></li>
+            <li><router-link to="/errorLog">ErrorLog</router-link></li>
+            <li><router-link to="/config">Config</router-link></li>
         </ul>
     </div>
 </template>
