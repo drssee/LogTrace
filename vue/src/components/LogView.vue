@@ -39,20 +39,13 @@ export default {
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         this.selectedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+        this.fetchLogs();
     },
     methods: {
-        fetchLogs() {
-            console.log(`selectedDateTime: ${this.selectedDateTime}`);
-            this.$axios.get('/log/logView?dateTime='+this.selectedDateTime)
-
-            this.logs = [
-                `로그 1 (${this.selectedDateTime})`,
-                `로그 2 (${this.selectedDateTime})`,
-                `로그 3 (${this.selectedDateTime})`,
-                `로그 4 (${this.selectedDateTime})`,
-                `로그 5 (${this.selectedDateTime})`,
-                `로그 6 (${this.selectedDateTime})`,
-            ];
+        async fetchLogs() {
+            const res = await this.$axios.get('/log/logView?dateTime='+this.selectedDateTime);
+            this.logs = res.data;
+            console.log(this.logs)
         },
     },
     watch: {

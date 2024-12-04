@@ -54,9 +54,7 @@ public class GoogleSendMail implements SendMail {
 
             // 메일 전송
             Transport.send(message);
-            logger.info("email sent successfully");
         } catch (MessagingException e) {
-            logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }

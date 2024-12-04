@@ -10,13 +10,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class JdbcLogRepository implements LogRepository {
 
-    private final Logger logger = LoggerFactory.getLogger(JdbcLogRepository.class);
     private final DataSource dataSource;
     private final Sql sql;
     private final ObjectMapper objectMapper;
@@ -29,17 +29,17 @@ public class JdbcLogRepository implements LogRepository {
 
     @Override
     public void initTable() {
-        executeQuery(sql.getCreateTableSql(), null);
+        executeQueryWithEntity(sql.getCreateTableSql(), null);
     }
 
     @Override
     public List<LogEntity> findAll() {
-        return executeQueryForAllList(sql.getSelectAllSql());
+        return executeQueryForList(sql.getSelectAllSql());
     }
 
     @Override
     public Long save(LogEntity logEntity) {
-        return executeQuery(sql.getInsertSql(), logEntity);
+        return executeQueryWithEntity(sql.getInsertSql(), logEntity);
     }
 
     @Override
@@ -47,7 +47,12 @@ public class JdbcLogRepository implements LogRepository {
         return executeQueryForObject(sql.getSelectSql(), id);
     }
 
-    private Long executeQuery(String sql, LogEntity entity) {
+    @Override
+    public List<LogEntity> findLogsByCreatedAt(LocalDateTime start, LocalDateTime end) {
+        return executeQueryForListWithLocalDateTime(sql.getSelectByCreatedAt(), start, end);
+    }
+
+    private Long executeQueryWithEntity(String sql, LogEntity entity) {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -73,7 +78,6 @@ public class JdbcLogRepository implements LogRepository {
             return 0L;
 
         } catch (SQLException e) {
-            logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -86,51 +90,83 @@ public class JdbcLogRepository implements LogRepository {
                 pstmt.setLong(1, id);
             }
 
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                LogEntity logEntity = new LogEntity();
-                logEntity.setId(rs.getLong(1));
-                logEntity.setTransactionId(rs.getString(2));
-                logEntity.setClassName(rs.getString(3));
-                logEntity.setMethodName(rs.getString(4));
-                logEntity.setArgs(parse(rs.getString(5), Object[].class));
-                logEntity.setResult(rs.getObject(6));
-                logEntity.setThrowableMessage(rs.getString(7));
-                logEntity.setCreatedAt(rs.getTimestamp(8).toLocalDateTime());
-                return logEntity;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    LogEntity logEntity = new LogEntity();
+                    logEntity.setId(rs.getLong(1));
+                    logEntity.setTransactionId(rs.getString(2));
+                    logEntity.setClassName(rs.getString(3));
+                    logEntity.setMethodName(rs.getString(4));
+                    logEntity.setArgs(parse(rs.getString(5), Object[].class));
+                    logEntity.setResult(rs.getObject(6));
+                    logEntity.setThrowableMessage(rs.getString(7));
+                    logEntity.setCreatedAt(rs.getTimestamp(8).toLocalDateTime());
+                    return logEntity;
+                }
             }
 
             return null;
         } catch (SQLException e) {
-            logger.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    private List<LogEntity> executeQueryForAllList(String sql) {
+    private List<LogEntity> executeQueryForList(String sql) {
         List<LogEntity> logEntities = new ArrayList<>();
 
         try (Connection conn = dataSource.getConnection()) {
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
 
-            while (rs.next()) {
-                LogEntity logEntity = new LogEntity();
-                logEntity.setId(rs.getLong(1));
-                logEntity.setTransactionId(rs.getString(2));
-                logEntity.setClassName(rs.getString(3));
-                logEntity.setMethodName(rs.getString(4));
-                logEntity.setArgs(parse(rs.getString(5), Object[].class));
-                logEntity.setResult(rs.getObject(6));
-                logEntity.setThrowableMessage(rs.getString(7));
-                logEntity.setCreatedAt(rs.getTimestamp(8).toLocalDateTime());
-                logEntities.add(logEntity);
+            try (ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    LogEntity logEntity = new LogEntity();
+                    logEntity.setId(rs.getLong(1));
+                    logEntity.setTransactionId(rs.getString(2));
+                    logEntity.setClassName(rs.getString(3));
+                    logEntity.setMethodName(rs.getString(4));
+                    logEntity.setArgs(parse(rs.getString(5), Object[].class));
+                    logEntity.setResult(rs.getObject(6));
+                    logEntity.setThrowableMessage(rs.getString(7));
+                    logEntity.setCreatedAt(rs.getTimestamp(8).toLocalDateTime());
+                    logEntities.add(logEntity);
+                }
             }
 
             return logEntities;
 
         } catch (SQLException e) {
-            logger.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<LogEntity> executeQueryForListWithLocalDateTime(String sql, LocalDateTime... parameters) {
+        List<LogEntity> logEntities = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            for (int i = 1; i <= parameters.length; i++) {
+                pstmt.setTimestamp(i, Timestamp.valueOf(parameters[i - 1]));
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    LogEntity logEntity = new LogEntity();
+                    logEntity.setId(rs.getLong(1));
+                    logEntity.setTransactionId(rs.getString(2));
+                    logEntity.setClassName(rs.getString(3));
+                    logEntity.setMethodName(rs.getString(4));
+                    logEntity.setArgs(parse(rs.getString(5), Object[].class));
+                    logEntity.setResult(rs.getObject(6));
+                    logEntity.setThrowableMessage(rs.getString(7));
+                    logEntity.setCreatedAt(rs.getTimestamp(8).toLocalDateTime());
+                    logEntities.add(logEntity);
+                }
+            }
+
+            return logEntities;
+
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

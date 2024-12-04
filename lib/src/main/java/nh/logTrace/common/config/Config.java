@@ -1,7 +1,6 @@
 package nh.logTrace.common.config;
 
 import nh.logTrace.admin.AdminPageController;
-import nh.logTrace.admin.AdminPageRepository;
 import nh.logTrace.admin.AdminPageService;
 import nh.logTrace.alert.LogAlert;
 import nh.logTrace.alert.MESSAGE.MessageLogAlert;
@@ -36,7 +35,6 @@ import javax.sql.DataSource;
 @ComponentScan(basePackages = "nh.logTrace.common")
 public class Config implements WebMvcConfigurer {
 
-    private Logger logger = LoggerFactory.getLogger(Config.class);
     private final ConfigProperties configProperties;
 
     public Config(ConfigProperties configProperties) {
@@ -48,7 +46,6 @@ public class Config implements WebMvcConfigurer {
      */
     @Bean
     public Advisor logTrace(LogTraceAdvice logTraceAdvice) {
-        logger.info("init logTrace");
         JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
         pointcut.setPattern(configProperties.getBasePackage() + ".*");
 
@@ -60,7 +57,6 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     public LogTraceAdvice logTraceAdvice() {
-        logger.info("init logTraceAdvice");
         return new LogTraceAdvice();
     }
     /*
@@ -78,20 +74,12 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     public AdminPageController adminPageController() {
-        logger.info("init adminPageController");
         return new AdminPageController(adminPageService());
     }
 
     @Bean
     public AdminPageService adminPageService() {
-        logger.info("init adminPageService");
-        return new AdminPageService(adminPageRepository());
-    }
-
-    @Bean
-    public AdminPageRepository adminPageRepository() {
-        logger.info("init adminPageRepository");
-        return new AdminPageRepository();
+        return new AdminPageService();
     }
     /*
     admin 페이지 등록 종료
@@ -103,14 +91,12 @@ public class Config implements WebMvcConfigurer {
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "FILE", matchIfMissing = true)
     public LogSave fileLogSave() {
-        logger.info("init FileLogSave");
         return new FileLogSave();
     }
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
     public LogSave dbLogSave(LogRepository logRepository) {
-        logger.info("init DBLogSave");
         return new DbLogSave(logRepository);
     }
 
@@ -118,14 +104,12 @@ public class Config implements WebMvcConfigurer {
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
     public DbAdapter dbAdapter(DataSource dataSource) {
-        logger.info("init DBAdapter");
         return new DbAdapter(dataSource);
     }
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
-    public LogRepository JdbcLogRepository(DataSource dataSource) {
-        logger.info("init JdbcLogRepository");
+    public LogRepository jdbcLogRepository(DataSource dataSource) {
         return new JdbcLogRepository(dataSource, dbAdapter(dataSource));
     }
     /*
@@ -138,21 +122,18 @@ public class Config implements WebMvcConfigurer {
     @Bean
     @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
     public LogAlert mailLogAlert() {
-        logger.info("init MailLogAlert");
         return new MailLogAlert(configProperties.getEmailId(), configProperties.getEmailPwd(), googleSendMail());
     }
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
     public SendMail googleSendMail() {
-        logger.info("init GoogleSendMail");
         return new GoogleSendMail();
     }
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MESSAGE", matchIfMissing = true)
     public LogAlert messageLogAlert() {
-        logger.info("init MessageLogAlert");
         return new MessageLogAlert();
     }
 

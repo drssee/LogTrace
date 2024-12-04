@@ -10,7 +10,8 @@ public class H2Sql extends Sql{
             "    args VARCHAR(255),\n" +
             "    result VARCHAR(255),\n" +
             "    throwable_message VARCHAR(255),\n" +
-            "    created_at TIMESTAMP\n" +
+            "    created_at TIMESTAMP,\n" +
+            "    INDEX idx_created_at (created_at)\n" +
             ");";
 
     private String H2_INSERT = "INSERT INTO logtrace (\n" +
@@ -22,10 +23,13 @@ public class H2Sql extends Sql{
     private String H2_SELECT = "SELECT * FROM logtrace WHERE id = ?;";
     private String H2_SELECT_ALL = "SELECT * FROM logtrace";
 
+    private String H2_SELECT_BY_CREATED_AT = "SELECT * FROM logtrace WHERE created_at BETWEEN ? AND ?";
+
     public H2Sql() {
         this.createTableSql = H2_CREATE_TABLE;
         this.insertSql = H2_INSERT;
         this.selectSql = H2_SELECT;
         this.selectAllSql = H2_SELECT_ALL;
+        this.selectByCreatedAt = H2_SELECT_BY_CREATED_AT;
     }
 }

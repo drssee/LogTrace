@@ -1,6 +1,7 @@
 package nh.logTrace.admin;
 
-import nh.logTrace.common.domain.LogDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +29,10 @@ public class AdminPageController {
 
     @GetMapping("/logView")
     @ResponseBody
-    public List<LogDto> logView(
+    public List<String> logView(
             @RequestParam(name = "dateTime")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime
     ) {
-        System.out.println("Received LocalDateTime: " + dateTime);
-
-        return null;
+        return adminPageService.findLogListByDateTime(dateTime);
     }
 }

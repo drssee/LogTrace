@@ -1,7 +1,6 @@
 package nh.logTrace.common.domain;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 public class LogDto {
 
