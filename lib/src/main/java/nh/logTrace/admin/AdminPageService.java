@@ -2,8 +2,6 @@ package nh.logTrace.admin;
 
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.repository.LogRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,11 @@ public class AdminPageService {
             try (BufferedReader br = new BufferedReader(new FileReader(logFile))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    logs.add("[FILE]" + line);
+                    LocalDateTime extractDateTime = extractDateTime(line);
+                    if (extractDateTime != null &&
+                            extractDateTime(line).getMinute() == dateTime.getMinute()) {
+                        logs.add("[FILE]" + line);
+                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -64,5 +67,15 @@ public class AdminPageService {
         }
 
         return logs;
+    }
+
+    private static LocalDateTime extractDateTime(String line) {
+        try {
+            String timestamp = line.substring(0, 19);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            return LocalDateTime.parse(timestamp, formatter);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
     }
 }

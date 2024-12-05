@@ -1,7 +1,5 @@
 package nh.logTrace.admin;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -27,6 +26,7 @@ public class AdminPageController {
         return "forward:/index.html";
     }
 
+    // TODO 관리자 기능 ip 체크 하는 어노테이션 추가 필요
     @GetMapping("/logView")
     @ResponseBody
     public List<String> logView(
@@ -34,5 +34,15 @@ public class AdminPageController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime
     ) {
         return adminPageService.findLogListByDateTime(dateTime);
+    }
+
+    @GetMapping("/errorView")
+    @ResponseBody
+    public List<String> errorView(
+            @RequestParam(name = "date")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
+    ) {
+        System.out.println(date);
+        return new ArrayList<>();
     }
 }

@@ -5,8 +5,6 @@ import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.LogSave;
 import nh.logTrace.save.XmlLoggerInitializer;
 import nh.logTrace.save.db.repository.LogRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * (logRepository - jdbc/jpa/mybatis logRepository) -> (dbAdapter) -> (sql - oracle/maira/h2 sql)

@@ -15,8 +15,6 @@ import nh.logTrace.save.db.repository.JdbcLogRepository;
 import nh.logTrace.save.db.repository.LogRepository;
 import nh.logTrace.save.file.FileLogSave;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;

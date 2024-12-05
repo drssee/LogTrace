@@ -1,34 +1,27 @@
 <template>
     <div>
         <h1>LogView</h1>
-        <p>날짜와 시간으로 로그를 조회해 보여줘야함(default: 현재 시각)</p>
         <!-- 하위 컴포넌트에 v-model 바인딩(양방향) -->
-        <DatePicker v-model="selectedDateTime" />
+        <DatePicker v-model="selectedDateTime" mode="datetime"/>
         <button @click="fetchLogs">조회</button>
-
-        <!-- 로그 출력 영역 -->
-        <div class="log-container">
-            <ul>
-                <li v-for="(log, index) in logs" :key="index">
-                    {{ log }}
-                </li>
-            </ul>
-        </div>
+        <LogContainer :logs="logs" />
     </div>
 </template>
 
 <script>
-import DatePicker from "../components/DatePicker.vue";
+import DatePicker from "@/components/include/DatePicker.vue";
+import LogContainer from "@/components/include/LogContainer.vue";
 
 export default {
     name: "LogView",
     components: {
         DatePicker,
+        LogContainer
     },
     data() {
         return {
             selectedDateTime: "",
-            logs: [],
+            logs: []
         };
     },
     created() {
@@ -38,42 +31,16 @@ export default {
         const day = String(now.getDate()).padStart(2, '0');
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
+
         this.selectedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
         this.fetchLogs();
     },
     methods: {
         async fetchLogs() {
+            this.logs = [];
             const res = await this.$axios.get('/log/logView?dateTime='+this.selectedDateTime);
             this.logs = res.data;
-            console.log(this.logs)
         },
-    },
-    watch: {
-        selectedDateTime(newValue, oldValue) {
-            console.log(`날짜 및 시간 변경: 이전 값 = ${oldValue}, 새로운 값 = ${newValue}`);
-        },
-    },
+    }
 };
 </script>
-
-<style>
-.log-container {
-    margin-top: 20px;
-    height: 200px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    background-color: #f9f9f9;
-}
-
-.log-container ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.log-container li {
-    margin-bottom: 5px;
-    font-size: 14px;
-}
-</style>

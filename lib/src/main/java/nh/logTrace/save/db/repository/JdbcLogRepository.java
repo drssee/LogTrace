@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.DbAdapter;
 import nh.logTrace.save.db.sql.Sql;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;

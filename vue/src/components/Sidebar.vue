@@ -1,9 +1,9 @@
 <template>
     <div class="sidebar">
         <ul>
-            <li><router-link to="/logView">LogView</router-link></li>
-            <li><router-link to="/errorLog">ErrorLog</router-link></li>
-            <li><router-link to="/config">Config</router-link></li>
+            <li><router-link to="/logView">로그확인</router-link></li>
+            <li><router-link to="/errorLog">에러로그확인</router-link></li>
+            <li><router-link to="/config">설정</router-link></li>
         </ul>
     </div>
 </template>

@@ -2,16 +2,18 @@
     <div>
         <h3>날짜 및 시간 선택</h3>
         <input type="date" :value="dateValue" @input="updateDate" />
-        <select :value="hourValue" @change="updateHour">
-            <option v-for="hour in hours" :key="hour" :value="hour">
-                {{ hour }}시
-            </option>
-        </select>
-        <select :value="minuteValue" @change="updateMinute">
-            <option v-for="minute in minutes" :key="minute" :value="minute">
-                {{ minute }}분
-            </option>
-        </select>
+        <template v-if="showTime">
+            <select :value="hourValue" @change="updateHour">
+                <option v-for="hour in hours" :key="hour" :value="hour">
+                    {{ hour }}시
+                </option>
+            </select>
+            <select :value="minuteValue" @change="updateMinute">
+                <option v-for="minute in minutes" :key="minute" :value="minute">
+                    {{ minute }}분
+                </option>
+            </select>
+        </template>
     </div>
 </template>
 
@@ -22,6 +24,10 @@ export default {
         value: {
             type: String,
             required: false,
+        },
+        mode: {
+            type: String,
+            default: "date",
         },
     },
     computed: {
@@ -34,18 +40,25 @@ export default {
         minuteValue() {
             return this.value ? this.value.split("T")[1]?.split(":")[1] : "00";
         },
+        showTime() {
+            return this.mode === "datetime";
+        },
     },
     data() {
         return {
-            hours: Array.from({length: 24}, (_, i) => String(i).padStart(2, "0")),
-            minutes: Array.from({length: 60}, (_, i) => String(i).padStart(2, "0")),
+            hours: Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")),
+            minutes: Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")),
         };
     },
     methods: {
         updateDate(e) {
             const newDate = e.target.value;
-            const time = `${this.hourValue}:${this.minuteValue}`;
-            this.$emit("input", `${newDate}T${time}`);
+            if (this.mode === "date") {
+                this.$emit("input", newDate);
+            } else {
+                const time = `${this.hourValue}:${this.minuteValue}`;
+                this.$emit("input", `${newDate}T${time}`);
+            }
         },
         updateHour(e) {
             const newHour = e.target.value;
