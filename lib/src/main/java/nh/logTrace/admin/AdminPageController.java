@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +41,8 @@ public class AdminPageController {
     @ResponseBody
     public List<String> errorView(
             @RequestParam(name = "date")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        System.out.println(date);
-        return new ArrayList<>();
+        return adminPageService.findErrLogListByDate(date);
     }
 }
