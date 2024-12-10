@@ -11,8 +11,9 @@ public class ConfigProperties {
 
     private final String[] SAVE_METHODS = {"FILE", "DB"};
     private final String[] ALERT_METHODS = {"MESSAGE", "MAIL"};
-    private String DEFAULT_ADMIN_URL = "/log/**";
-    private String DEFAULT_BASE_PACKAGE = "nh.logTrace";
+    private final String DEFAULT_ADMIN_URL = "/log/**";
+    private final String DEFAULT_BASE_PACKAGE = "nh.logTrace";
+    private final int DEFAULT_INDEX = 0;
 
     private String save;
     private String alert;
@@ -22,6 +23,8 @@ public class ConfigProperties {
     private String emailPwd;
 
     public ConfigProperties() {
+        this.save = SAVE_METHODS[DEFAULT_INDEX];
+        this.alert = ALERT_METHODS[DEFAULT_INDEX];
         this.adminUrl = DEFAULT_ADMIN_URL;
         this.basePackage = DEFAULT_BASE_PACKAGE;
     }
@@ -78,5 +81,13 @@ public class ConfigProperties {
 
     public void setEmailPwd(String emailPwd) {
         this.emailPwd = emailPwd;
+    }
+
+    public String[] getALERT_METHODS() {
+        return ALERT_METHODS;
+    }
+
+    public String[] getSAVE_METHODS() {
+        return SAVE_METHODS;
     }
 }

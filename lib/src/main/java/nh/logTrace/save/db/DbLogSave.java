@@ -4,7 +4,7 @@ import nh.logTrace.common.domain.LogDto;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.LogSave;
 import nh.logTrace.save.XmlLoggerInitializer;
-import nh.logTrace.save.db.repository.LogRepository;
+import nh.logTrace.save.db.repository.JdbcLogRepository;
 
 /**
  * (logRepository - jdbc/jpa/mybatis logRepository) -> (dbAdapter) -> (sql - oracle/maira/h2 sql)
@@ -12,12 +12,12 @@ import nh.logTrace.save.db.repository.LogRepository;
 public class DbLogSave implements LogSave {
 
     private final String DEFAULT_CONFIG_FILE = "logback-logtrace-console.xml";
-    private final LogRepository logRepository;
+    private final JdbcLogRepository jdbcLogRepository;
 
-    public DbLogSave(LogRepository logRepository) {
+    public DbLogSave(JdbcLogRepository jdbcLogRepository) {
         XmlLoggerInitializer.init(DEFAULT_CONFIG_FILE);
-        this.logRepository = logRepository;
-        this.logRepository.initTable();
+        this.jdbcLogRepository = jdbcLogRepository;
+        this.jdbcLogRepository.initTable();
     }
 
     @Override
@@ -33,6 +33,6 @@ public class DbLogSave implements LogSave {
         logEntity.setThrowableMessage(logDto.getThrowableMessage());
         logEntity.setCreatedAt(logDto.getCreatedAt());
 
-        this.logRepository.save(logEntity);
+        this.jdbcLogRepository.save(logEntity);
     }
 }

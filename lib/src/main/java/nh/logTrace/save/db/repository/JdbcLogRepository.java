@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class JdbcLogRepository implements LogRepository {
+public class JdbcLogRepository {
 
     private final DataSource dataSource;
     private final Sql sql;
@@ -25,27 +25,22 @@ public class JdbcLogRepository implements LogRepository {
         this.objectMapper = new ObjectMapper();
     }
 
-    @Override
     public void initTable() {
         executeQueryWithEntity(sql.getCreateTableSql(), null);
     }
 
-    @Override
     public List<LogEntity> findAll() {
         return executeQueryForList(sql.getSelectAllSql());
     }
 
-    @Override
     public Long save(LogEntity logEntity) {
         return executeQueryWithEntity(sql.getInsertSql(), logEntity);
     }
 
-    @Override
     public LogEntity findById(Long id) {
         return executeQueryForObject(sql.getSelectSql(), id);
     }
 
-    @Override
     public List<LogEntity> findLogsByCreatedAt(LocalDateTime start, LocalDateTime end) {
         return executeQueryForListWithLocalDateTime(sql.getSelectByCreatedAt(), start, end);
     }

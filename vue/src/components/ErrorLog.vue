@@ -39,11 +39,6 @@ export default {
             const res = await this.$axios.get('/log/errorView?date='+this.selectedDate);
             this.logs = res.data;
         },
-    },
-    watch: {
-        selectedDate(n, o) {
-            console.log('n: '+n+' o: '+o);
-        }
     }
 };
 </script>

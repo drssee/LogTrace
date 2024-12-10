@@ -1,9 +1,17 @@
 package nh.logTrace.admin;
 
+import nh.logTrace.alert.LogAlert;
+import nh.logTrace.alert.mail.MailLogAlert;
+import nh.logTrace.common.config.ConfigProperties;
 import nh.logTrace.common.domain.LogEntity;
-import nh.logTrace.save.db.repository.LogRepository;
+import nh.logTrace.save.db.repository.JdbcLogRepository;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.JdkRegexpMethodPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,9 +29,37 @@ import java.util.List;
 @Service
 public class AdminPageService {
 
-    // TODO 동적 config에 등록되어 사용될 빈들 주입시 생성자 주입으로 사용하도록 변경 필요
+    private JdbcLogRepository jdbcLogRepository;
+    private ConfigProperties configProperties;
+    private ResourceHandlerRegistry registry; //adminUrl
+    private DefaultPointcutAdvisor logTrace; //basePackage
+    private LogAlert logAlert;
+
+    @Autowired
+    public void setJdbcLogRepository(JdbcLogRepository jdbcLogRepository) {
+        this.jdbcLogRepository = jdbcLogRepository;
+    }
+
+    @Autowired
+    public void setConfigProperties(ConfigProperties configProperties) {
+        this.configProperties = configProperties;
+    }
+
     @Autowired(required = false)
-    private LogRepository logRepository;
+    public void setRegistry(ResourceHandlerRegistry registry) {
+        this.registry = registry;
+    }
+
+    @Autowired
+    public void setLogTrace(@Qualifier("logTrace") DefaultPointcutAdvisor logTrace) {
+        this.logTrace = logTrace;
+    }
+
+    @Autowired(required = false)
+    public void setLogAlert(@Qualifier("mailLogAlert") LogAlert logAlert) {
+        this.logAlert = logAlert;
+    }
+
 
     private final String PATH = "logs";
 
@@ -53,11 +89,11 @@ public class AdminPageService {
         }
 
         // DB
-        if (logRepository != null) {
+        if (jdbcLogRepository != null) {
             // 선택된 분을 between 조회 하기 위한 start, end 생성
             LocalDateTime start = dateTime.withSecond(0);
             LocalDateTime end = dateTime.withSecond(59);
-            List<LogEntity> logEntities = logRepository.findLogsByCreatedAt(start, end);
+            List<LogEntity> logEntities = jdbcLogRepository.findLogsByCreatedAt(start, end);
 
             String line;
             for (LogEntity logEntity : logEntities) {
@@ -96,11 +132,11 @@ public class AdminPageService {
         });
 
         // DB
-        if (logRepository != null) {
+        if (jdbcLogRepository != null) {
             // 선택된 분을 between 조회 하기 위한 start, end 생성
             LocalDateTime start = date.atStartOfDay();
             LocalDateTime end = date.atTime(LocalTime.MAX);
-            List<LogEntity> logEntities = logRepository.findLogsByCreatedAt(start, end);
+            List<LogEntity> logEntities = jdbcLogRepository.findLogsByCreatedAt(start, end);
 
             String line;
             for (LogEntity logEntity : logEntities) {
@@ -112,6 +148,44 @@ public class AdminPageService {
         }
 
         return logs;
+    }
+
+    public void updateConfig(ConfigProperties updateConfig) {
+        // adminUrl 수정
+        if (StringUtils.hasText(configProperties.getAdminUrl()) &&
+                !configProperties.getAdminUrl().equals(updateConfig.getAdminUrl())) {
+
+            registry.addResourceHandler(updateConfig.getAdminUrl())
+                    .addResourceLocations("classpath:/static/");
+
+            configProperties.setAdminUrl(updateConfig.getAdminUrl());
+        }
+
+        // basePackage 수정
+        if (StringUtils.hasText(configProperties.getBasePackage()) &&
+                !configProperties.getBasePackage().equals(updateConfig.getBasePackage())) {
+
+            JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
+            pointcut.setPattern(updateConfig.getBasePackage() + ".*");
+
+            logTrace.setPointcut(pointcut);
+
+            configProperties.setBasePackage(updateConfig.getBasePackage());
+        }
+
+        // emailId, pwd 수정
+        if (StringUtils.hasText(configProperties.getEmailId()) &&
+                StringUtils.hasText(configProperties.getEmailPwd()) &&
+                !configProperties.getEmailId().equals(updateConfig.getEmailId()) &&
+                !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd()) &&
+                logAlert instanceof MailLogAlert mailLogAlert) {
+
+            mailLogAlert.setEmailId(updateConfig.getEmailId());
+            mailLogAlert.setEmailPwd(updateConfig.getEmailPwd());
+
+            configProperties.setEmailId(updateConfig.getEmailId());
+            configProperties.setEmailPwd(updateConfig.getEmailPwd());
+        }
     }
 
     private LocalDateTime extractDateTime(String line) {

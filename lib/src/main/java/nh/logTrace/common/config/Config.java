@@ -12,7 +12,6 @@ import nh.logTrace.save.LogSave;
 import nh.logTrace.save.db.DbAdapter;
 import nh.logTrace.save.db.DbLogSave;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
-import nh.logTrace.save.db.repository.LogRepository;
 import nh.logTrace.save.file.FileLogSave;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
@@ -43,7 +42,7 @@ public class Config implements WebMvcConfigurer {
     로그 트레이스 빈 등록 시작
      */
     @Bean
-    public Advisor logTrace(LogTraceAdvice logTraceAdvice) {
+    public DefaultPointcutAdvisor logTrace(LogTraceAdvice logTraceAdvice) {
         JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
         pointcut.setPattern(configProperties.getBasePackage() + ".*");
 
@@ -72,7 +71,7 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     public AdminPageController adminPageController() {
-        return new AdminPageController(adminPageService());
+        return new AdminPageController(adminPageService(), configProperties);
     }
 
     @Bean
@@ -94,11 +93,10 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
-    public LogSave dbLogSave(LogRepository logRepository) {
-        return new DbLogSave(logRepository);
+    public LogSave dbLogSave(JdbcLogRepository jdbcLogRepository) {
+        return new DbLogSave(jdbcLogRepository);
     }
 
-    // TODO 사용 dataSource 빈이 여러개일 경우 문제가 생김, 해결방법 생각해보기
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
     public DbAdapter dbAdapter(DataSource dataSource) {
@@ -107,7 +105,7 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     @ConditionalOnProperty(name = "logtrace.save", havingValue = "DB")
-    public LogRepository jdbcLogRepository(DataSource dataSource) {
+    public JdbcLogRepository jdbcLogRepository(DataSource dataSource) {
         return new JdbcLogRepository(dataSource, dbAdapter(dataSource));
     }
     /*

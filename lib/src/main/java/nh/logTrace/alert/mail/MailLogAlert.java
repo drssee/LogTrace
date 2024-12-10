@@ -6,8 +6,8 @@ import nh.logTrace.common.domain.ThreadStatus;
 
 public class MailLogAlert implements LogAlert {
 
-    private final String emailId;
-    private final String emailPwd;
+    private String emailId;
+    private String emailPwd;
     private final SendMail sendMail;
 
     public MailLogAlert(String emailId, String emailPwd, SendMail sendMail) {
@@ -24,5 +24,13 @@ public class MailLogAlert implements LogAlert {
                 threadStatus.getTransactionId() + " - " + logDto.getThrowableMessage() + "(" + logDto.getCreatedAt() + ")",
                 logDto.getThrowableStackTrace().toString()
         );
+    }
+
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+
+    public void setEmailPwd(String emailPwd) {
+        this.emailPwd = emailPwd;
     }
 }
