@@ -7,17 +7,21 @@ import nh.logTrace.alert.MESSAGE.MessageLogAlert;
 import nh.logTrace.alert.mail.GoogleSendMail;
 import nh.logTrace.alert.mail.MailLogAlert;
 import nh.logTrace.alert.mail.SendMail;
+import nh.logTrace.common.aop.DynamicPointcutAdvisor;
 import nh.logTrace.common.aop.LogTraceAdvice;
 import nh.logTrace.save.LogSave;
 import nh.logTrace.save.db.DbAdapter;
 import nh.logTrace.save.db.DbLogSave;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
 import nh.logTrace.save.file.FileLogSave;
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -42,19 +46,10 @@ public class Config implements WebMvcConfigurer {
     로그 트레이스 빈 등록 시작
      */
     @Bean
-    public DefaultPointcutAdvisor logTrace(LogTraceAdvice logTraceAdvice) {
-        JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
-        pointcut.setPattern(configProperties.getBasePackage() + ".*");
-
-        // 메소드 호출을 가로챈뒤, loggingCall 실행
-        MethodInterceptor interceptor = logTraceAdvice::loggingCall;
-
-        return new DefaultPointcutAdvisor(pointcut, interceptor);
-    }
-
-    @Bean
-    public LogTraceAdvice logTraceAdvice() {
-        return new LogTraceAdvice();
+    public DynamicPointcutAdvisor logTrace(
+            @Qualifier("logTraceAdvice") Advice logTraceAdvice,
+            ConfigurableApplicationContext applicationContext) {
+        return new DynamicPointcutAdvisor(logTraceAdvice, configProperties.getBasePackage(), applicationContext);
     }
     /*
     로그 트레이스 빈 등록 종료

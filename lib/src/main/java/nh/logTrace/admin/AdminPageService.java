@@ -2,6 +2,7 @@ package nh.logTrace.admin;
 
 import nh.logTrace.alert.LogAlert;
 import nh.logTrace.alert.mail.MailLogAlert;
+import nh.logTrace.common.aop.DynamicPointcutAdvisor;
 import nh.logTrace.common.config.ConfigProperties;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
@@ -31,8 +32,7 @@ public class AdminPageService {
 
     private JdbcLogRepository jdbcLogRepository;
     private ConfigProperties configProperties;
-    private ResourceHandlerRegistry registry; //adminUrl
-    private DefaultPointcutAdvisor logTrace; //basePackage
+    private DynamicPointcutAdvisor logTrace; //basePackage
     private LogAlert logAlert;
 
     @Autowired
@@ -45,13 +45,8 @@ public class AdminPageService {
         this.configProperties = configProperties;
     }
 
-    @Autowired(required = false)
-    public void setRegistry(ResourceHandlerRegistry registry) {
-        this.registry = registry;
-    }
-
     @Autowired
-    public void setLogTrace(@Qualifier("logTrace") DefaultPointcutAdvisor logTrace) {
+    public void setLogTrace(@Qualifier("logTrace") DynamicPointcutAdvisor logTrace) {
         this.logTrace = logTrace;
     }
 
@@ -151,24 +146,12 @@ public class AdminPageService {
     }
 
     public void updateConfig(ConfigProperties updateConfig) {
-        // adminUrl 수정
-        if (StringUtils.hasText(configProperties.getAdminUrl()) &&
-                !configProperties.getAdminUrl().equals(updateConfig.getAdminUrl())) {
-
-            registry.addResourceHandler(updateConfig.getAdminUrl())
-                    .addResourceLocations("classpath:/static/");
-
-            configProperties.setAdminUrl(updateConfig.getAdminUrl());
-        }
 
         // basePackage 수정
         if (StringUtils.hasText(configProperties.getBasePackage()) &&
                 !configProperties.getBasePackage().equals(updateConfig.getBasePackage())) {
 
-            JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
-            pointcut.setPattern(updateConfig.getBasePackage() + ".*");
-
-            logTrace.setPointcut(pointcut);
+            logTrace.updateBasePackage(updateConfig.getBasePackage());
 
             configProperties.setBasePackage(updateConfig.getBasePackage());
         }
