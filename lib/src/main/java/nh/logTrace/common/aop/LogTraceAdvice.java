@@ -19,7 +19,6 @@ public class LogTraceAdvice {
     private LogSave logSave;
     private LogAlert logAlert;
 
-    // TODO LogAlert, LogSave 프록시 생성 후 연결
     @Autowired
     public void setLogAlert(LogAlert logAlert) {
         this.logAlert = logAlert;

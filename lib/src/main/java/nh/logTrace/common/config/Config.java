@@ -42,7 +42,7 @@ public class Config implements WebMvcConfigurer {
     로그 트레이스 빈 등록 시작
      */
     @Bean
-    public DefaultPointcutAdvisor logTrace(LogTraceAdvice logTraceAdvice) {
+    public Advisor logTrace(LogTraceAdvice logTraceAdvice) {
         JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
         pointcut.setPattern(configProperties.getBasePackage() + ".*");
 

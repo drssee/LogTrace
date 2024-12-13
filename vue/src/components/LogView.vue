@@ -37,9 +37,14 @@ export default {
     },
     methods: {
         async fetchLogs() {
-            this.logs = [];
-            const res = await this.$axios.get('/log/logView?dateTime='+this.selectedDateTime);
-            this.logs = res.data;
+            try {
+                this.logs = [];
+                const res = await this.$axios.get('/log/logView?dateTime=' + this.selectedDateTime);
+                this.logs = res.data;
+            } catch (e) {
+                console.error(e);
+                alert('조회중 서버에서 오류가 발생했습니다.');
+            }
         },
     }
 };
