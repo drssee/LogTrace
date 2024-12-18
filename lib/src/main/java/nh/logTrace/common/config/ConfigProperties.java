@@ -82,12 +82,4 @@ public class ConfigProperties {
     public void setEmailPwd(String emailPwd) {
         this.emailPwd = emailPwd;
     }
-
-    public String[] getALERT_METHODS() {
-        return ALERT_METHODS;
-    }
-
-    public String[] getSAVE_METHODS() {
-        return SAVE_METHODS;
-    }
 }

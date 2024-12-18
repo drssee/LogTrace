@@ -132,7 +132,6 @@ public class Config implements WebMvcConfigurer {
     public LogAlert messageLogAlert() {
         return new MessageLogAlert();
     }
-
     /*
     alert 빈 등록 종료
      */

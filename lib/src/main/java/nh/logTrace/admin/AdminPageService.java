@@ -1,14 +1,10 @@
 package nh.logTrace.admin;
 
-import nh.logTrace.alert.LogAlert;
-import nh.logTrace.alert.mail.MailLogAlert;
-import nh.logTrace.common.config.ConfigProperties;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,26 +23,12 @@ import java.util.List;
 public class AdminPageService {
 
     private JdbcLogRepository jdbcLogRepository;
-    private ConfigProperties configProperties;
-    private LogAlert logAlert;
+    private final String PATH = "logs";
 
-    @Autowired
+    @Autowired(required = false)
     public void setJdbcLogRepository(JdbcLogRepository jdbcLogRepository) {
         this.jdbcLogRepository = jdbcLogRepository;
     }
-
-    @Autowired
-    public void setConfigProperties(ConfigProperties configProperties) {
-        this.configProperties = configProperties;
-    }
-
-    @Autowired(required = false)
-    public void setLogAlert(@Qualifier("mailLogAlert") LogAlert logAlert) {
-        this.logAlert = logAlert;
-    }
-
-
-    private final String PATH = "logs";
 
     // 현재 저장 방식과 관계없이 파일과 db 모두 날짜 기준으로 뒤져서 확인해야함
     public List<String> findLogListByDateTime(LocalDateTime dateTime) {
@@ -97,7 +79,7 @@ public class AdminPageService {
         // 파일
         // ex) logTrace.2024-12-04-11.log
         String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        List<File> logFiles = findLogFilesByDate(PATH, formattedDate);
+        List<File> logFiles = findLogFilesByDate(formattedDate);
         logFiles.forEach(logFile -> {
 
             if (logFile.exists() && logFile.isFile()) {
@@ -135,25 +117,6 @@ public class AdminPageService {
         return logs;
     }
 
-    public void updateConfig(ConfigProperties updateConfig) {
-
-        // TODO LogAlert, LogSave 프록시 생성 후 연결 후 service 에서 save alert 수정되도록?
-
-        // emailId, pwd 수정
-        if (StringUtils.hasText(configProperties.getEmailId()) &&
-                StringUtils.hasText(configProperties.getEmailPwd()) &&
-                !configProperties.getEmailId().equals(updateConfig.getEmailId()) &&
-                !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd()) &&
-                logAlert instanceof MailLogAlert mailLogAlert) {
-
-            mailLogAlert.setEmailId(updateConfig.getEmailId());
-            mailLogAlert.setEmailPwd(updateConfig.getEmailPwd());
-
-            configProperties.setEmailId(updateConfig.getEmailId());
-            configProperties.setEmailPwd(updateConfig.getEmailPwd());
-        }
-    }
-
     private LocalDateTime extractDateTime(String line) {
         try {
             String timestamp = line.substring(0, 19);
@@ -164,8 +127,8 @@ public class AdminPageService {
         }
     }
 
-    private List<File> findLogFilesByDate(String directoryPath, String targetDate) {
-        File directory = new File(directoryPath);
+    private List<File> findLogFilesByDate(String targetDate) {
+        File directory = new File(PATH);
         List<File> matchingFiles = new ArrayList<>();
 
         if (directory.isDirectory()) {

@@ -1,23 +1,13 @@
 <template>
     <div>
-        <h1>Config</h1>
+        <h1>Config 조회</h1>
         <div class="block-mt10">
-            <label for="save">save</label>
-            <select name="save" id="save" v-model="config.save">
-                <option v-for="saveMethod in config.save_METHODS" :key="saveMethod" :value="saveMethod">
-                    {{ saveMethod }}
-                </option>
-            </select>
-        </div>
-        <div class="block-mt10">
-            <label for="alert">alert</label>
-            <select name="alert" id="alert" v-model="config.alert">
-                <option v-for="alertMethod in config.alert_METHODS" :key="alertMethod" :value="alertMethod">
-                    {{ alertMethod }}
-                </option>
-            </select>
-        </div>
-        <div class="block-mt10">
+            <label>save</label>
+            <input type="text" name="save" v-model="config.save" readonly>
+
+            <label>alert</label>
+            <input type="text" name="alert" v-model="config.alert" readonly>
+
             <label>adminUrl</label>
             <input type="text" name="adminUrl" v-model="config.adminUrl" readonly>
 
@@ -25,12 +15,11 @@
             <input type="text" name="basePackage" v-model="config.basePackage" readonly>
 
             <label>emailId</label>
-            <input type="text" name="emailId" v-model="config.emailId">
+            <input type="text" name="emailId" v-model="config.emailId" readonly>
 
             <label>emailPwd</label>
-            <input type="text" name="emailPwd" v-model="config.emailPwd">
+            <input type="text" name="emailPwd" v-model="config.emailPwd" readonly>
         </div>
-        <button @click="updateConfig">수정</button>
     </div>
 </template>
 <script>
@@ -45,8 +34,6 @@ export default {
                 basePackage: "",
                 emailId: "",
                 emailPwd: "",
-                alert_METHODS: [],
-                save_METHODS: []
             }
         }
     },
@@ -63,8 +50,6 @@ export default {
                     basePackage: "",
                     emailId: "",
                     emailPwd: "",
-                    alert_METHODS: [],
-                    save_METHODS: []
                 }
 
                 const res = await this.$axios.get('/log/config');
@@ -74,17 +59,6 @@ export default {
                 alert('조회중 서버에서 오류가 발생했습니다.');
             }
         },
-        async updateConfig() {
-            try {
-                const res = await this.$axios.post('/log/config', this.config);
-                if (res.status === 200) {
-                    await this.fetchConfig();
-                }
-            } catch (e) {
-                console.error(e);
-                alert('조회중 서버에서 오류가 발생했습니다.');
-            }
-        }
     }
 };
 </script>
