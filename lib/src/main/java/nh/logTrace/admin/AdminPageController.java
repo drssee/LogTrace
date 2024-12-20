@@ -2,11 +2,10 @@ package nh.logTrace.admin;
 
 import nh.logTrace.common.config.ConfigProperties;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,5 +51,12 @@ public class AdminPageController {
     @ResponseBody
     public ConfigProperties config() {
         return configProperties;
+    }
+
+    @PostMapping("/config/alert")
+    @ResponseBody
+    public ResponseEntity<HttpStatus> changeAlert(@RequestBody ConfigProperties configProperties) {
+        adminPageService.changeAlert(configProperties);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

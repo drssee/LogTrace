@@ -1,10 +1,14 @@
 package nh.logTrace.admin;
 
+import nh.logTrace.alert.mail.MailLogAlert;
+import nh.logTrace.common.config.ConfigProperties;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
+import org.springframework.aop.support.JdkRegexpMethodPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,11 +27,17 @@ import java.util.List;
 public class AdminPageService {
 
     private JdbcLogRepository jdbcLogRepository;
+    private ConfigProperties configProperties;
     private final String PATH = "logs";
 
     @Autowired(required = false)
     public void setJdbcLogRepository(JdbcLogRepository jdbcLogRepository) {
         this.jdbcLogRepository = jdbcLogRepository;
+    }
+
+    @Autowired
+    public void setConfigProperties(ConfigProperties configProperties) {
+        this.configProperties = configProperties;
     }
 
     // 현재 저장 방식과 관계없이 파일과 db 모두 날짜 기준으로 뒤져서 확인해야함
@@ -115,6 +125,24 @@ public class AdminPageService {
         }
 
         return logs;
+    }
+
+    public void changeAlert(ConfigProperties updateConfig) {
+        // alert 가 mail 일 경우와 message 일 경우 나눠서 처리하자
+
+        // emailId, pwd 수정
+//        if (StringUtils.hasText(configProperties.getEmailId()) &&
+//                StringUtils.hasText(configProperties.getEmailPwd()) &&
+//                !configProperties.getEmailId().equals(updateConfig.getEmailId()) &&
+//                !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd()) &&
+//                logAlert instanceof MailLogAlert mailLogAlert) {
+//
+//            mailLogAlert.setEmailId(updateConfig.getEmailId());
+//            mailLogAlert.setEmailPwd(updateConfig.getEmailPwd());
+//
+//            configProperties.setEmailId(updateConfig.getEmailId());
+//            configProperties.setEmailPwd(updateConfig.getEmailPwd());
+//        }
     }
 
     private LocalDateTime extractDateTime(String line) {

@@ -4,6 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @ConfigurationProperties(prefix = "logtrace")
@@ -14,6 +16,8 @@ public class ConfigProperties {
     private final String DEFAULT_ADMIN_URL = "/log/**";
     private final String DEFAULT_BASE_PACKAGE = "nh.logTrace";
     private final int DEFAULT_INDEX = 0;
+    private final String ALERT_MESSAGE_BEAN_NAME = "messageLogAlert";
+    private final String MAIL_MESSAGE_BEAN_NAME = "mailLogAlert";
 
     private String save;
     private String alert;
@@ -22,11 +26,15 @@ public class ConfigProperties {
     private String emailId;
     private String emailPwd;
 
+    private Map<String, String> alertName = new HashMap<>();
+
     public ConfigProperties() {
         this.save = SAVE_METHODS[DEFAULT_INDEX];
         this.alert = ALERT_METHODS[DEFAULT_INDEX];
         this.adminUrl = DEFAULT_ADMIN_URL;
         this.basePackage = DEFAULT_BASE_PACKAGE;
+        alertName.put("MESSAGE", ALERT_MESSAGE_BEAN_NAME);
+        alertName.put("MAIL", MAIL_MESSAGE_BEAN_NAME);
     }
 
     public String getAlert() {
@@ -81,5 +89,13 @@ public class ConfigProperties {
 
     public void setEmailPwd(String emailPwd) {
         this.emailPwd = emailPwd;
+    }
+
+    public String getAlertBeanName() {
+        return this.alertName.get(this.alert);
+    }
+
+    public String[] getALERT_METHODS() {
+        return ALERT_METHODS;
     }
 }

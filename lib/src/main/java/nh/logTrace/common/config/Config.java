@@ -7,6 +7,7 @@ import nh.logTrace.alert.MESSAGE.MessageLogAlert;
 import nh.logTrace.alert.mail.GoogleSendMail;
 import nh.logTrace.alert.mail.MailLogAlert;
 import nh.logTrace.alert.mail.SendMail;
+import nh.logTrace.alert.proxy.LogAlertProxy;
 import nh.logTrace.common.aop.LogTraceAdvice;
 import nh.logTrace.save.LogSave;
 import nh.logTrace.save.db.DbAdapter;
@@ -18,6 +19,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -33,9 +35,11 @@ import javax.sql.DataSource;
 public class Config implements WebMvcConfigurer {
 
     private final ConfigProperties configProperties;
+    private final ApplicationContext applicationContext;
 
-    public Config(ConfigProperties configProperties) {
+    public Config(ConfigProperties configProperties, ApplicationContext applicationContext) {
         this.configProperties = configProperties;
+        this.applicationContext = applicationContext;
     }
 
     /*
@@ -116,21 +120,26 @@ public class Config implements WebMvcConfigurer {
     alert 빈 등록 시작
      */
     @Bean
-    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
+//    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
     public LogAlert mailLogAlert() {
         return new MailLogAlert(configProperties.getEmailId(), configProperties.getEmailPwd(), googleSendMail());
     }
 
     @Bean
-    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
+//    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
     public SendMail googleSendMail() {
         return new GoogleSendMail();
     }
 
     @Bean
-    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MESSAGE", matchIfMissing = true)
+//    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MESSAGE", matchIfMissing = true)
     public LogAlert messageLogAlert() {
         return new MessageLogAlert();
+    }
+
+    @Bean
+    public LogAlertProxy logAlertProxy() {
+        return new LogAlertProxy(applicationContext, configProperties);
     }
     /*
     alert 빈 등록 종료
