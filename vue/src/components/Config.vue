@@ -78,6 +78,7 @@ export default {
                 const res = await this.$axios.post('/log/config/alert', this.config);
                 if (res.status === 200) {
                     await this.fetchConfig();
+                    alert('수정되었습니다.');
                 }
             } catch (e) {
                 console.error(e);

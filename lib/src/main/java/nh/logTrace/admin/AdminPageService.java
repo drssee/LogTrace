@@ -1,6 +1,8 @@
 package nh.logTrace.admin;
 
+import nh.logTrace.alert.LogAlert;
 import nh.logTrace.alert.mail.MailLogAlert;
+import nh.logTrace.alert.proxy.LogAlertProxy;
 import nh.logTrace.common.config.ConfigProperties;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
@@ -28,6 +30,7 @@ public class AdminPageService {
 
     private JdbcLogRepository jdbcLogRepository;
     private ConfigProperties configProperties;
+    private LogAlertProxy logAlertProxy;
     private final String PATH = "logs";
 
     @Autowired(required = false)
@@ -38,6 +41,11 @@ public class AdminPageService {
     @Autowired
     public void setConfigProperties(ConfigProperties configProperties) {
         this.configProperties = configProperties;
+    }
+
+    @Autowired
+    public void setLogAlertProxy(LogAlertProxy logAlertProxy) {
+        this.logAlertProxy = logAlertProxy;
     }
 
     // 현재 저장 방식과 관계없이 파일과 db 모두 날짜 기준으로 뒤져서 확인해야함
@@ -128,21 +136,27 @@ public class AdminPageService {
     }
 
     public void changeAlert(ConfigProperties updateConfig) {
-        // alert 가 mail 일 경우와 message 일 경우 나눠서 처리하자
+        // 설정 변경 + 빈 변경
+        configProperties.setAlert(updateConfig.getAlert());
+        logAlertProxy.changeLogAlert();
 
-        // emailId, pwd 수정
-//        if (StringUtils.hasText(configProperties.getEmailId()) &&
-//                StringUtils.hasText(configProperties.getEmailPwd()) &&
-//                !configProperties.getEmailId().equals(updateConfig.getEmailId()) &&
-//                !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd()) &&
-//                logAlert instanceof MailLogAlert mailLogAlert) {
-//
-//            mailLogAlert.setEmailId(updateConfig.getEmailId());
-//            mailLogAlert.setEmailPwd(updateConfig.getEmailPwd());
-//
-//            configProperties.setEmailId(updateConfig.getEmailId());
-//            configProperties.setEmailPwd(updateConfig.getEmailPwd());
-//        }
+        // alert 가 mail 일 경우와 message 일 경우 나눠서 처리하자
+        if ("MAIL".equals(updateConfig.getAlert())) {
+            LogAlert target = logAlertProxy.getTarget();
+            // emailId, pwd 수정
+            if (StringUtils.hasText(configProperties.getEmailId()) &&
+                    StringUtils.hasText(configProperties.getEmailPwd()) &&
+                    !configProperties.getEmailId().equals(updateConfig.getEmailId()) &&
+                    !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd()) &&
+                    target instanceof MailLogAlert mailLogAlert) {
+
+                mailLogAlert.setEmailId(updateConfig.getEmailId());
+                mailLogAlert.setEmailPwd(updateConfig.getEmailPwd());
+
+                configProperties.setEmailId(updateConfig.getEmailId());
+                configProperties.setEmailPwd(updateConfig.getEmailPwd());
+            }
+        }
     }
 
     private LocalDateTime extractDateTime(String line) {
