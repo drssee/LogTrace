@@ -27,9 +27,9 @@ LogTrace 라이브러리는 어노테이션 기반 메서드 관점 AOP 를 이�
    프로젝트 빌드 도구(예: Maven, Gradle)에서 해당 JAR 파일을 인식하도록 설정합니다.<br>
 2. 스프링 설정 클래스에 @EnableLogTrace 를 사용하여 애플리케이션에 로깅 기능을 활성화합니다.<br>
 3. yml or properties 파일에 logtrace 설정을 작성합니다.<br>
-   `logtrace.base-package=com.example.app(!로그 추적 대상 패키지를 지정)`
-   `logtrace.alert=message(default-mail)`
-   `logtrace.admin-url=/admin/**(default-/log/**)`
-   `logtrace.email-id=your-email@google.com(무료 메일 서비스인 구글만 이용 가능)`
-   `logtrace.email-pwd=your-password(구글 메일 api 키 등록 필요)`
-   `logtrace.save=db(default-file)`
+   `logtrace.base-package=com.example.app(!로그 추적 대상 패키지를 지정)`<br>
+   `logtrace.alert=message(default-mail)`<br>
+   `logtrace.admin-url=/admin/**(default-/log/**)`<br>
+   `logtrace.email-id=your-email@google.com(무료 메일 서비스인 구글만 이용 가능)`<br>
+   `logtrace.email-pwd=your-password(구글 메일 api 키 등록 필요)`<br>
+   `logtrace.save=db(default-file)`<br>
