@@ -1,6 +1,6 @@
 # LogTrace v1.0
 로그추적기 라이브러리 프로젝트
-spring-boot-starter,web,aop:3.3.5 / java17 / vue2.x
+spring-boot:3.3.5(web,aop) / java17 / vue2.x
 
 ## 개요
 LogTrace 라이브러리는 어노테이션 기반 메서드 관점 AOP 를 이용하여 요청 쓰레드별 로깅 및 알림 기능을 제공합니다. 
