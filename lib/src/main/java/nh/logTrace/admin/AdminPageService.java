@@ -146,8 +146,8 @@ public class AdminPageService {
             // emailId, pwd 수정
             if (StringUtils.hasText(configProperties.getEmailId()) &&
                     StringUtils.hasText(configProperties.getEmailPwd()) &&
-                    !configProperties.getEmailId().equals(updateConfig.getEmailId()) &&
-                    !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd()) &&
+                    (!configProperties.getEmailId().equals(updateConfig.getEmailId()) ||
+                            !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd())) &&
                     target instanceof MailLogAlert mailLogAlert) {
 
                 mailLogAlert.setEmailId(updateConfig.getEmailId());
