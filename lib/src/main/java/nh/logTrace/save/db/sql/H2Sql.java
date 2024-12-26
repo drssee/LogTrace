@@ -11,7 +11,7 @@ public class H2Sql extends Sql{
             "    result VARCHAR(255),\n" +
             "    throwable_message VARCHAR(255),\n" +
             "    created_at TIMESTAMP,\n" +
-            "    INDEX idx_created_at (created_at)\n" +
+            "    CONSTRAINT idx_created_at UNIQUE (created_at)\n" +
             ");";
 
     private String H2_INSERT = "INSERT INTO logtrace (\n" +

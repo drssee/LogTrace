@@ -39,7 +39,7 @@ export default {
         async fetchLogs() {
             try {
                 this.logs = [];
-                const res = await this.$axios.get('/log/logView?dateTime='+this.selectedDateTime);
+                const res = await this.$axios.get('/log/logView?dateTime=' + this.selectedDateTime);
                 this.logs = res.data;
             } catch (e) {
                 console.error(e);

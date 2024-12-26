@@ -1,6 +1,7 @@
 package nh.logTrace.common.aop;
 
 import nh.logTrace.alert.LogAlert;
+import nh.logTrace.alert.proxy.LogAlertProxy;
 import nh.logTrace.common.domain.LogDto;
 import nh.logTrace.common.domain.ThreadStatus;
 import nh.logTrace.save.LogSave;
@@ -17,10 +18,10 @@ public class LogTraceAdvice implements MethodInterceptor {
     private static final ThreadLocal<ThreadStatus> threadHolder = new ThreadLocal<>();
 
     private LogSave logSave;
-    private LogAlert logAlert;
+    private LogAlertProxy logAlert;
 
     @Autowired
-    public void setLogAlert(LogAlert logAlert) {
+    public void setLogAlert(LogAlertProxy logAlert) {
         this.logAlert = logAlert;
     }
 

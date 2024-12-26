@@ -2,17 +2,15 @@ package nh.logTrace.admin;
 
 import nh.logTrace.alert.LogAlert;
 import nh.logTrace.alert.mail.MailLogAlert;
-import nh.logTrace.common.aop.DynamicPointcutAdvisor;
+import nh.logTrace.alert.proxy.LogAlertProxy;
 import nh.logTrace.common.config.ConfigProperties;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
-import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,10 +30,10 @@ public class AdminPageService {
 
     private JdbcLogRepository jdbcLogRepository;
     private ConfigProperties configProperties;
-    private DynamicPointcutAdvisor logTrace; //basePackage
-    private LogAlert logAlert;
+    private LogAlertProxy logAlertProxy;
+    private final String PATH = "logs";
 
-    @Autowired
+    @Autowired(required = false)
     public void setJdbcLogRepository(JdbcLogRepository jdbcLogRepository) {
         this.jdbcLogRepository = jdbcLogRepository;
     }
@@ -46,17 +44,9 @@ public class AdminPageService {
     }
 
     @Autowired
-    public void setLogTrace(@Qualifier("logTrace") DynamicPointcutAdvisor logTrace) {
-        this.logTrace = logTrace;
+    public void setLogAlertProxy(LogAlertProxy logAlertProxy) {
+        this.logAlertProxy = logAlertProxy;
     }
-
-    @Autowired(required = false)
-    public void setLogAlert(@Qualifier("mailLogAlert") LogAlert logAlert) {
-        this.logAlert = logAlert;
-    }
-
-
-    private final String PATH = "logs";
 
     // 현재 저장 방식과 관계없이 파일과 db 모두 날짜 기준으로 뒤져서 확인해야함
     public List<String> findLogListByDateTime(LocalDateTime dateTime) {
@@ -107,7 +97,7 @@ public class AdminPageService {
         // 파일
         // ex) logTrace.2024-12-04-11.log
         String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        List<File> logFiles = findLogFilesByDate(PATH, formattedDate);
+        List<File> logFiles = findLogFilesByDate(formattedDate);
         logFiles.forEach(logFile -> {
 
             if (logFile.exists() && logFile.isFile()) {
@@ -145,29 +135,27 @@ public class AdminPageService {
         return logs;
     }
 
-    public void updateConfig(ConfigProperties updateConfig) {
+    public void changeAlert(ConfigProperties updateConfig) {
+        // 설정 변경 + 빈 변경
+        configProperties.setAlert(updateConfig.getAlert());
+        logAlertProxy.changeLogAlert();
 
-        // basePackage 수정
-        if (StringUtils.hasText(configProperties.getBasePackage()) &&
-                !configProperties.getBasePackage().equals(updateConfig.getBasePackage())) {
+        // alert 가 mail 일 경우와 message 일 경우 나눠서 처리하자
+        if ("MAIL".equals(updateConfig.getAlert())) {
+            LogAlert target = logAlertProxy.getTarget();
+            // emailId, pwd 수정
+            if (StringUtils.hasText(configProperties.getEmailId()) &&
+                    StringUtils.hasText(configProperties.getEmailPwd()) &&
+                    (!configProperties.getEmailId().equals(updateConfig.getEmailId()) ||
+                            !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd())) &&
+                    target instanceof MailLogAlert mailLogAlert) {
 
-            logTrace.updateBasePackage(updateConfig.getBasePackage());
+                mailLogAlert.setEmailId(updateConfig.getEmailId());
+                mailLogAlert.setEmailPwd(updateConfig.getEmailPwd());
 
-            configProperties.setBasePackage(updateConfig.getBasePackage());
-        }
-
-        // emailId, pwd 수정
-        if (StringUtils.hasText(configProperties.getEmailId()) &&
-                StringUtils.hasText(configProperties.getEmailPwd()) &&
-                !configProperties.getEmailId().equals(updateConfig.getEmailId()) &&
-                !configProperties.getEmailPwd().equals(updateConfig.getEmailPwd()) &&
-                logAlert instanceof MailLogAlert mailLogAlert) {
-
-            mailLogAlert.setEmailId(updateConfig.getEmailId());
-            mailLogAlert.setEmailPwd(updateConfig.getEmailPwd());
-
-            configProperties.setEmailId(updateConfig.getEmailId());
-            configProperties.setEmailPwd(updateConfig.getEmailPwd());
+                configProperties.setEmailId(updateConfig.getEmailId());
+                configProperties.setEmailPwd(updateConfig.getEmailPwd());
+            }
         }
     }
 
@@ -181,8 +169,8 @@ public class AdminPageService {
         }
     }
 
-    private List<File> findLogFilesByDate(String directoryPath, String targetDate) {
-        File directory = new File(directoryPath);
+    private List<File> findLogFilesByDate(String targetDate) {
+        File directory = new File(PATH);
         List<File> matchingFiles = new ArrayList<>();
 
         if (directory.isDirectory()) {

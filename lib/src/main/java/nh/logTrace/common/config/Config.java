@@ -7,21 +7,19 @@ import nh.logTrace.alert.MESSAGE.MessageLogAlert;
 import nh.logTrace.alert.mail.GoogleSendMail;
 import nh.logTrace.alert.mail.MailLogAlert;
 import nh.logTrace.alert.mail.SendMail;
-import nh.logTrace.common.aop.DynamicPointcutAdvisor;
+import nh.logTrace.alert.proxy.LogAlertProxy;
 import nh.logTrace.common.aop.LogTraceAdvice;
 import nh.logTrace.save.LogSave;
 import nh.logTrace.save.db.DbAdapter;
 import nh.logTrace.save.db.DbLogSave;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
 import nh.logTrace.save.file.FileLogSave;
-import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.JdkRegexpMethodPointcut;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -37,19 +35,30 @@ import javax.sql.DataSource;
 public class Config implements WebMvcConfigurer {
 
     private final ConfigProperties configProperties;
+    private final ApplicationContext applicationContext;
 
-    public Config(ConfigProperties configProperties) {
+    public Config(ConfigProperties configProperties, ApplicationContext applicationContext) {
         this.configProperties = configProperties;
+        this.applicationContext = applicationContext;
     }
 
     /*
     로그 트레이스 빈 등록 시작
      */
     @Bean
-    public DynamicPointcutAdvisor logTrace(
-            @Qualifier("logTraceAdvice") Advice logTraceAdvice,
-            ConfigurableApplicationContext applicationContext) {
-        return new DynamicPointcutAdvisor(logTraceAdvice, configProperties.getBasePackage(), applicationContext);
+    public Advisor logTrace(LogTraceAdvice logTraceAdvice) {
+        JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
+        pointcut.setPattern(configProperties.getBasePackage() + ".*");
+
+        // 메소드 호출을 가로챈뒤, loggingCall 실행
+        MethodInterceptor interceptor = logTraceAdvice::loggingCall;
+
+        return new DefaultPointcutAdvisor(pointcut, interceptor);
+    }
+
+    @Bean
+    public LogTraceAdvice logTraceAdvice() {
+        return new LogTraceAdvice();
     }
     /*
     로그 트레이스 빈 등록 종료
@@ -111,23 +120,27 @@ public class Config implements WebMvcConfigurer {
     alert 빈 등록 시작
      */
     @Bean
-    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
+//    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
     public LogAlert mailLogAlert() {
         return new MailLogAlert(configProperties.getEmailId(), configProperties.getEmailPwd(), googleSendMail());
     }
 
     @Bean
-    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
+//    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MAIL")
     public SendMail googleSendMail() {
         return new GoogleSendMail();
     }
 
     @Bean
-    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MESSAGE", matchIfMissing = true)
+//    @ConditionalOnProperty(name = "logtrace.alert", havingValue = "MESSAGE", matchIfMissing = true)
     public LogAlert messageLogAlert() {
         return new MessageLogAlert();
     }
 
+    @Bean
+    public LogAlertProxy logAlertProxy() {
+        return new LogAlertProxy(applicationContext, configProperties);
+    }
     /*
     alert 빈 등록 종료
      */

@@ -53,10 +53,10 @@ public class AdminPageController {
         return configProperties;
     }
 
-    @PostMapping("/config")
+    @PostMapping("/config/alert")
     @ResponseBody
-    public ResponseEntity<HttpStatus> updateConfig(@RequestBody ConfigProperties configProperties) {
-        adminPageService.updateConfig(configProperties);
+    public ResponseEntity<HttpStatus> changeAlert(@RequestBody ConfigProperties configProperties) {
+        adminPageService.changeAlert(configProperties);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
