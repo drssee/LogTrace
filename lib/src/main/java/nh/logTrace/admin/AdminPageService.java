@@ -191,7 +191,7 @@ public class AdminPageService {
     private String getLogString(LogEntity logEntity) {
         String log = "";
 
-        if (logEntity.getArgs().length != 0) {
+        if (logEntity.getArgs() != null && logEntity.getArgs().length != 0) {
             StringBuilder args = new StringBuilder();
             for (int i = 0; i < logEntity.getArgs().length; i++) {
                 if (i != 0) args.append(",");

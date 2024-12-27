@@ -49,11 +49,7 @@ public class Config implements WebMvcConfigurer {
     public Advisor logTrace(LogTraceAdvice logTraceAdvice) {
         JdkRegexpMethodPointcut pointcut = new JdkRegexpMethodPointcut();
         pointcut.setPattern(configProperties.getBasePackage() + ".*");
-
-        // 메소드 호출을 가로챈뒤, loggingCall 실행
-        MethodInterceptor interceptor = logTraceAdvice::loggingCall;
-
-        return new DefaultPointcutAdvisor(pointcut, interceptor);
+        return new DefaultPointcutAdvisor(pointcut, logTraceAdvice);
     }
 
     @Bean
