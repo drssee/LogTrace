@@ -6,9 +6,7 @@ import nh.logTrace.alert.proxy.LogAlertProxy;
 import nh.logTrace.common.config.ConfigProperties;
 import nh.logTrace.common.domain.LogEntity;
 import nh.logTrace.save.db.repository.JdbcLogRepository;
-import org.springframework.aop.support.JdkRegexpMethodPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

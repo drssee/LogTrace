@@ -1,6 +1,5 @@
 package nh.logTrace.common.aop;
 
-import nh.logTrace.alert.LogAlert;
 import nh.logTrace.alert.proxy.LogAlertProxy;
 import nh.logTrace.common.domain.LogDto;
 import nh.logTrace.common.domain.ThreadStatus;
